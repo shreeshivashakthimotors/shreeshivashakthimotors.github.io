@@ -28,31 +28,15 @@ jobs:
         env:
           GPS_TOKEN: ${{ secrets.MY_KEY_GPS_PHOTOS }}
         run: |
-          if [ -z "$GPS_TOKEN" ]; then
-            echo "Error: MY_KEY_GPS_PHOTOS secret is empty."
-            exit 1
-          fi
-          python3 -c '
-          import os, pathlib, sys
-          token = os.environ["GPS_TOKEN"]
-          replaced = False
-          for path in pathlib.Path(".").rglob("*.html"):
-              text = path.read_text(encoding="utf-8")
-              if "__MY_KEY_GPS_PHOTOS__" in text:
-                  path.write_text(text.replace("__MY_KEY_GPS_PHOTOS__", token), encoding="utf-8")
-                  print(f"Injected token into {path}")
-                  replaced = True
-          if not replaced:
-              print("Error: __MY_KEY_GPS_PHOTOS__ placeholder was not found.")
-              sys.exit(1)
-          '
+          test -n "$GPS_TOKEN" || (echo "Error: MY_KEY_GPS_PHOTOS secret is empty." && exit 1)
+          grep -q "__MY_KEY_GPS_PHOTOS__" gps-photos.html || (echo "Error: placeholder missing in gps-photos.html" && exit 1)
+          python3 -c 'import os, pathlib; p = pathlib.Path("gps-photos.html"); p.write_text(p.read_text().replace("__MY_KEY_GPS_PHOTOS__", os.environ["GPS_TOKEN"]))'
 
-          
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v4
         with:
           path: "."
 
