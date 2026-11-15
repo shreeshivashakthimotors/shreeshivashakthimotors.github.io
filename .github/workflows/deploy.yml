@@ -1,0 +1,47 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Inject GPS Photos token
+        env:
+          GPS_TOKEN: ${{ secrets.MY_KEY_GPS_PHOTOS }}
+        run: |
+          if [ -z "$GPS_TOKEN" ]; then
+            echo "Error: MY_KEY_GPS_PHOTOS secret is empty."
+            exit 1
+          fi
+          sed -i "s|__MY_KEY_GPS_PHOTOS__|${GPS_TOKEN}|g" gps-photos.html
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: "."
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
