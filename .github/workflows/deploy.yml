@@ -32,8 +32,22 @@ jobs:
             echo "Error: MY_KEY_GPS_PHOTOS secret is empty."
             exit 1
           fi
-          sed -i "s|__MY_KEY_GPS_PHOTOS__|${GPS_TOKEN}|g" gps-photos.html
+          python3 -c '
+          import os, pathlib, sys
+          token = os.environ["GPS_TOKEN"]
+          replaced = False
+          for path in pathlib.Path(".").rglob("*.html"):
+              text = path.read_text(encoding="utf-8")
+              if "__MY_KEY_GPS_PHOTOS__" in text:
+                  path.write_text(text.replace("__MY_KEY_GPS_PHOTOS__", token), encoding="utf-8")
+                  print(f"Injected token into {path}")
+                  replaced = True
+          if not replaced:
+              print("Error: __MY_KEY_GPS_PHOTOS__ placeholder was not found.")
+              sys.exit(1)
+          '
 
+          
       - name: Setup Pages
         uses: actions/configure-pages@v5
 

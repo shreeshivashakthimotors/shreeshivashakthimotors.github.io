@@ -661,11 +661,11 @@
     // Reads MY_KEY_GPS_PHOTOS from global scope/window or build-time replacement
     const RAW_GPS_KEY = typeof MY_KEY_GPS_PHOTOS !== "undefined"
       ? MY_KEY_GPS_PHOTOS
-      : (window.MY_KEY_GPS_PHOTOS || "${{ secrets.MY_KEY_GPS_PHOTOS }}");
+      : (window.MY_KEY_GPS_PHOTOS || "__MY_KEY_GPS_PHOTOS__");
 
     function resolveGithubToken() {
       const token = String(RAW_GPS_KEY || "").trim();
-      if (!token || token === "${{ secrets.MY_KEY_GPS_PHOTOS }}") return "";
+      if (!token || token === "__MY_KEY_GPS_PHOTOS__") return "";
       return token;
     }
 
