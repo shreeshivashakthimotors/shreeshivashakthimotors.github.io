@@ -665,7 +665,7 @@
 
     function resolveGithubToken() {
       const token = String(RAW_GPS_KEY || "").trim();
-      if (!token || token === "__MY_KEY_GPS_PHOTOS__") return "";
+      if (!token || token === "__MY_KEY_" + "GPS_PHOTOS__") return "";
       return token;
     }
 
