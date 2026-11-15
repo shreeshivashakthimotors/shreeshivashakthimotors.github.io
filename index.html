@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#002147">
+  <meta name="description" content="Visit Shree Shivashakthi Motors, a truck repair shop in Bevinahalli, Shahapur, Koppal. Find our location, contact details, Google reviews, and daily quick links.">
+  <title>Shree Shivashakthi Motors | Shahapur, Koppal</title>
+  <link rel="icon" type="image/png" href="Assets/Logo.png">
+  <style>
+    :root {
+      color-scheme: light;
+      --oxford: #002147;
+      --oxford-light: #153d66;
+      --green: #176b48;
+      --ink: #17241d;
+      --muted: #68766d;
+      --line: #e2e8e4;
+      --paper: #ffffff;
+      --background: #f5f7f3;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      min-width: 320px;
+      margin: 0;
+      background: var(--background);
+      color: var(--ink);
+      font-family: Inter, "Segoe UI", Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a {
+      color: inherit;
+    }
+
+    .page {
+      width: min(1120px, calc(100% - 40px));
+      margin: 0 auto;
+    }
+
+    .site-header {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      min-height: 82px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      margin-top: 20px;
+      padding: 12px 20px;
+      border-radius: 17px;
+      background: var(--oxford);
+      color: #ffffff;
+      box-shadow: 0 12px 34px rgba(0, 33, 71, 0.13);
+    }
+
+    .brand {
+      display: flex;
+      min-width: 0;
+      align-items: center;
+      gap: 13px;
+      text-decoration: none;
+    }
+
+    .brand-logo {
+      width: 52px;
+      height: 52px;
+      flex: 0 0 52px;
+      border-radius: 12px;
+      background: #ffffff;
+      object-fit: contain;
+      padding: 4px;
+    }
+
+    .brand-name {
+      display: block;
+      margin: 0;
+      font-size: 15px;
+      font-weight: 750;
+      letter-spacing: -0.025em;
+    }
+
+    .brand-caption {
+      display: block;
+      margin: 4px 0 0;
+      color: #cbd9e7;
+      font-size: 12px;
+    }
+
+    .main-nav {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .main-nav a {
+      color: #e3ebf3;
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: color 150ms ease;
+    }
+
+    .main-nav a:hover,
+    .main-nav a:focus-visible {
+      color: #ffffff;
+      text-decoration: underline;
+      text-underline-offset: 4px;
+    }
+
+    .main-nav .nav-quicklinks {
+      padding: 10px 14px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 10px;
+      color: #ffffff;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.12fr) minmax(300px, 0.88fr);
+      align-items: center;
+      gap: 52px;
+      padding: 82px 0 66px;
+    }
+
+    .eyebrow {
+      margin: 0 0 14px;
+      color: var(--green);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      max-width: 630px;
+      margin: 0;
+      color: var(--oxford);
+      font-size: clamp(40px, 6vw, 65px);
+      line-height: 1.02;
+      letter-spacing: -0.06em;
+    }
+
+    .hero-copy {
+      max-width: 560px;
+      margin: 20px 0 0;
+      color: #58675e;
+      font-size: 17px;
+      line-height: 1.7;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 11px;
+      margin-top: 27px;
+    }
+
+    .button {
+      display: inline-flex;
+      min-height: 46px;
+      align-items: center;
+      justify-content: center;
+      padding: 0 17px;
+      border: 1px solid var(--oxford);
+      border-radius: 11px;
+      background: var(--oxford);
+      color: #ffffff;
+      font-size: 13px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: background 150ms ease, transform 150ms ease;
+    }
+
+    .button:hover {
+      background: var(--oxford-light);
+      transform: translateY(-1px);
+    }
+
+    .button-secondary {
+      background: transparent;
+      color: var(--oxford);
+    }
+
+    .button-secondary:hover {
+      background: #eaf0f4;
+      color: var(--oxford);
+    }
+
+    .hero-panel {
+      position: relative;
+      overflow: hidden;
+      min-height: 355px;
+      padding: 26px;
+      border-radius: 22px;
+      background:
+        radial-gradient(circle at 88% 18%, rgba(255, 255, 255, 0.12) 0 85px, transparent 86px),
+        linear-gradient(145deg, #123f69, var(--oxford) 70%);
+      color: #ffffff;
+      box-shadow: 0 20px 45px rgba(0, 33, 71, 0.17);
+    }
+
+    .panel-label {
+      position: relative;
+      z-index: 1;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 11px;
+      border: 1px solid rgba(255, 255, 255, 0.24);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      color: #e3ebf3;
+      font-size: 11px;
+      font-weight: 650;
+    }
+
+    .panel-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #8ed3a9;
+    }
+
+    .panel-logo {
+      position: absolute;
+      top: 76px;
+      right: 24px;
+      width: 154px;
+      height: 154px;
+      border: 8px solid rgba(255, 255, 255, 0.94);
+      border-radius: 30px;
+      background: #ffffff;
+      object-fit: contain;
+      padding: 8px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.16);
+    }
+
+    .panel-copy {
+      position: absolute;
+      right: 26px;
+      bottom: 26px;
+      left: 26px;
+      max-width: 260px;
+    }
+
+    .panel-copy p {
+      margin: 0 0 9px;
+      color: #cbd9e7;
+      font-size: 12px;
+    }
+
+    .panel-copy h2 {
+      margin: 0;
+      font-size: 25px;
+      line-height: 1.15;
+      letter-spacing: -0.04em;
+    }
+
+    .google-summary {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .summary-chip {
+      padding: 9px 11px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #ffffff;
+      color: var(--oxford);
+      font-size: 12px;
+      font-weight: 650;
+      text-decoration: none;
+    }
+
+    .summary-chip:hover {
+      background: #eaf0f4;
+    }
+
+    .section {
+      padding: 78px 0;
+    }
+
+    .section-heading {
+      max-width: 620px;
+      margin-bottom: 28px;
+    }
+
+    .section-heading h2 {
+      margin: 0;
+      color: var(--oxford);
+      font-size: clamp(27px, 4vw, 39px);
+      line-height: 1.13;
+      letter-spacing: -0.05em;
+    }
+
+    .section-heading p {
+      margin: 12px 0 0;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.7;
+    }
+
+    .location-section {
+      display: grid;
+      grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+      align-items: stretch;
+      gap: 24px;
+    }
+
+    .location-card {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      padding: 30px;
+      border-radius: 18px;
+      background: var(--oxford);
+      color: #ffffff;
+    }
+
+    .location-kicker {
+      margin: 0 0 11px;
+      color: #a9c2d9;
+      font-size: 11px;
+      font-weight: 750;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .location-card h2 {
+      margin: 0;
+      font-size: 26px;
+      letter-spacing: -0.04em;
+    }
+
+    .address {
+      margin: 17px 0 21px;
+      color: #d3deeb;
+      font-size: 14px;
+      font-style: normal;
+      line-height: 1.75;
+    }
+
+    .location-card .button {
+      margin-top: auto;
+      border-color: #ffffff;
+      background: #ffffff;
+      color: var(--oxford);
+    }
+
+    .location-card .button:hover {
+      background: #e8eff5;
+    }
+
+    .map-frame {
+      display: block;
+      width: 100%;
+      min-height: 350px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: #e9eee9;
+    }
+
+    .photo-callout {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 22px;
+      margin-top: 24px;
+      padding: 24px 27px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--paper);
+    }
+
+    .photo-callout h3 {
+      margin: 0;
+      color: var(--oxford);
+      font-size: 17px;
+    }
+
+    .photo-callout p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .contact-section {
+      padding-top: 0;
+    }
+
+    .contact-card {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 24px;
+      padding: 30px;
+      border-radius: 18px;
+      background: #eaf0ec;
+    }
+
+    .contact-card h2 {
+      margin: 0;
+      color: var(--oxford);
+      font-size: 25px;
+      letter-spacing: -0.04em;
+    }
+
+    .contact-card p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .contact-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .site-footer {
+      margin-bottom: 20px;
+      padding: 22px;
+      border-radius: 15px;
+      background: var(--oxford);
+      color: #d3deeb;
+      font-size: 12px;
+    }
+
+    .footer-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .footer-row a {
+      color: #ffffff;
+      text-decoration: none;
+    }
+
+    .footer-row a:hover {
+      text-decoration: underline;
+    }
+
+    :focus-visible {
+      outline: 3px solid #6fae8a;
+      outline-offset: 3px;
+    }
+
+    @media (max-width: 760px) {
+      .hero {
+        grid-template-columns: 1fr;
+        gap: 32px;
+        padding: 62px 0 44px;
+      }
+
+      .hero-panel {
+        min-height: 315px;
+      }
+
+      .location-section {
+        grid-template-columns: 1fr;
+      }
+
+      .location-card {
+        min-height: 275px;
+      }
+
+      .contact-card {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 540px) {
+      .page {
+        width: min(100% - 28px, 1120px);
+      }
+
+      .site-header {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 13px;
+        padding: 14px;
+      }
+
+      .main-nav {
+        width: 100%;
+        justify-content: space-between;
+        gap: 10px;
+      }
+
+      .main-nav a {
+        font-size: 12px;
+      }
+
+      .main-nav .nav-quicklinks {
+        padding: 8px 10px;
+      }
+
+      .brand-logo {
+        width: 46px;
+        height: 46px;
+        flex-basis: 46px;
+      }
+
+      .hero {
+        padding-top: 48px;
+      }
+
+      .hero-copy {
+        font-size: 15px;
+      }
+
+      .hero-panel {
+        min-height: 300px;
+        padding: 20px;
+      }
+
+      .panel-logo {
+        top: 74px;
+        right: 20px;
+        width: 120px;
+        height: 120px;
+      }
+
+      .panel-copy {
+        right: 20px;
+        bottom: 20px;
+        left: 20px;
+      }
+
+      .panel-copy h2 {
+        max-width: 190px;
+        font-size: 22px;
+      }
+
+      .section {
+        padding: 58px 0;
+      }
+
+      .photo-callout {
+        align-items: flex-start;
+        flex-direction: column;
+        padding: 20px;
+      }
+
+      .map-frame {
+        min-height: 300px;
+      }
+
+      .contact-actions {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .contact-actions .button {
+        width: 100%;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
+      }
+
+      *,
+      *::before,
+      *::after {
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header page">
+    <a class="brand" href="index.html" aria-label="Shree Shivashakthi Motors home">
+      <img class="brand-logo" src="Assets/Logo.png" alt="">
+      <span>
+        <span class="brand-name">Shree Shivashakthi Motors</span>
+        <span class="brand-caption">Shahapur · Koppal, Karnataka</span>
+      </span>
+    </a>
+    <nav class="main-nav" aria-label="Main navigation">
+      <a class="nav-quicklinks" href="index.html" aria-current="page">Home</a>
+      <a class="nav-quicklinks" href="quicklinks.html">Quick Links</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero page" id="home" aria-labelledby="hero-title">
+      <div>
+        <p class="eyebrow">Truck repair shop · Bevinahalli</p>
+        <h1 id="hero-title">Shree Shivashakthi Motors</h1>
+        <p class="hero-copy">Find our workshop near Shahapur Toll Plaza on the Hosapete to Vijaypur Road. Get directions, contact us, or explore our Google listing.</p>
+        <div class="hero-actions">
+          <a class="button" href="https://maps.app.goo.gl/RynXUT3oZ7HsxCpk6" target="_blank" rel="noopener noreferrer">Get directions</a>
+          <a class="button button-secondary" href="tel:8660409599">Call 8660409599</a>
+        </div>
+        <div class="google-summary" aria-label="Google Maps business listing">
+          <a class="summary-chip" href="https://maps.app.goo.gl/RynXUT3oZ7HsxCpk6" target="_blank" rel="noopener noreferrer">See live Google rating &amp; reviews</a>
+        </div>
+      </div>
+      <div class="hero-panel" aria-label="Shree Shivashakthi Motors in Shahapur">
+        <span class="panel-label"><span class="panel-dot"></span> Bevinahalli, Koppal</span>
+        <img class="panel-logo" src="Assets/Logo.png" alt="Shree Shivashakthi Motors">
+        <div class="panel-copy">
+          <p>Find us on NH-50</p>
+          <h2>Here to help keep you moving.</h2>
+        </div>
+      </div>
+    </section>
+
+    <section class="section page" id="location" aria-labelledby="location-title">
+      <div class="section-heading">
+        <p class="eyebrow">Find our workshop</p>
+        <h2 id="location-title">Visit us in Bevinahalli</h2>
+        <p>We are located near Shahapur Toll Plaza, along the Hosapete to Vijaypur Road.</p>
+      </div>
+      <div class="location-section">
+        <div class="location-card">
+          <p class="location-kicker">Shree Shivashakthi Motors</p>
+          <h2>Plan your visit</h2>
+          <address class="address">
+            Plot No 381, NH-50 Survey No 26/6<br>
+            Near Shahapur Toll Plaza, Hosapete to Vijaypur Road<br>
+            Bevinahalli (Post), Shahapur, Tq &amp; Dist: Koppal,<br>
+            Karnataka 583228
+          </address>
+          <a class="button" href="https://maps.app.goo.gl/RynXUT3oZ7HsxCpk6" target="_blank" rel="noopener noreferrer">Open Google Maps</a>
+        </div>
+        <iframe
+          class="map-frame"
+          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3847.3767870785537!2d76.3105691757504!3d15.356067158133433!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bc775740164a68f%3A0x3eae2f5480b8a388!2sShree%20Shivashakthi%20Motors!5e0!3m2!1sen!2sin!4v1794738111999!5m2!1sen!2sin"
+          title="Google Maps location of Shree Shivashakthi Motors"
+          loading="lazy"
+          referrerpolicy="strict-origin-when-cross-origin"
+          allowfullscreen>
+        </iframe>
+      </div>
+      <div class="photo-callout">
+        <div>
+          <h3>See photos and customer reviews</h3>
+          <p>Visit our Google Maps profile to browse the latest photos, reviews, and business details.</p>
+        </div>
+        <a class="button button-secondary" href="https://maps.app.goo.gl/RynXUT3oZ7HsxCpk6" target="_blank" rel="noopener noreferrer">View Google profile</a>
+      </div>
+    </section>
+
+    <section class="section contact-section page" id="contact" aria-labelledby="contact-title">
+      <div class="contact-card">
+        <div>
+          <p class="eyebrow">Get in touch</p>
+          <h2 id="contact-title">Contact Shree Shivashakthi Motors</h2>
+          <p>Call us or send an email. For directions and the latest listing information, visit us on Google Maps.</p>
+        </div>
+        <div class="contact-actions">
+          <a class="button" href="tel:8660409599">Call 8660409599</a>
+          <a class="button button-secondary" href="mailto:shreeshivashakthimotors@gmail.com">Send an email</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer page">
+    <div class="footer-row">
+      <span>© Shree Shivashakthi Motors · Shahapur, Koppal</span>
+      <a href="quicklinks.html">Open daily quick links</a>
+    </div>
+  </footer>
+</body>
+</html>

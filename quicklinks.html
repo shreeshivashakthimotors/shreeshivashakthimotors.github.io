@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#002147">
+  <title>Shree Shivashakthi Motors | Quick Links</title>
+  <link rel="icon" type="image/png" href="Assets/Logo.png">
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #17241d;
+      --muted: #68766d;
+      --green: #176b48;
+      --green-dark: #10543a;
+      --oxford-blue: #002147;
+      --line: #e4eae5;
+      --surface: #ffffff;
+      --background: #f5f7f3;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-width: 320px;
+      background: var(--background);
+      color: var(--ink);
+      font-family: Inter, "Segoe UI", Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .page {
+      width: min(1120px, calc(100% - 40px));
+      margin: 0 auto;
+    }
+
+    main.page {
+      padding: 34px 0 42px;
+    }
+
+    .site-header {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      min-height: 82px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      margin-top: 20px;
+      padding: 12px 20px;
+      border-radius: 17px;
+      background: var(--oxford-blue);
+      color: #ffffff;
+      box-shadow: 0 12px 34px rgba(0, 33, 71, 0.13);
+    }
+
+    .brand {
+      display: flex;
+      min-width: 0;
+      align-items: center;
+      gap: 13px;
+      color: #ffffff;
+      text-decoration: none;
+    }
+
+    .brand-logo {
+      width: 52px;
+      height: 52px;
+      flex: 0 0 52px;
+      border-radius: 12px;
+      background: #ffffff;
+      object-fit: contain;
+      padding: 4px;
+    }
+
+    .brand-name {
+      display: block;
+      font-size: 15px;
+      font-weight: 750;
+      letter-spacing: -0.025em;
+    }
+
+    .brand-caption {
+      display: block;
+      margin: 4px 0 0;
+      color: #cbd9e7;
+      font-size: 12px;
+    }
+
+    .main-nav {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .main-nav a {
+      color: #e3ebf3;
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: color 150ms ease;
+    }
+
+    .main-nav a:hover,
+    .main-nav a:focus-visible {
+      color: #ffffff;
+      text-decoration: underline;
+      text-underline-offset: 4px;
+    }
+
+    .main-nav .nav-quicklinks {
+      padding: 10px 14px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 10px;
+      color: #ffffff;
+    }
+
+    .hero {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 24px;
+      margin-bottom: 27px;
+    }
+
+    .eyebrow {
+      margin: 0 0 9px;
+      color: var(--green);
+      font-size: 11px;
+      font-weight: 750;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(30px, 5vw, 42px);
+      line-height: 1.1;
+      letter-spacing: -0.055em;
+    }
+
+    .hero-copy {
+      max-width: 530px;
+      margin: 11px 0 0;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    .search {
+      position: relative;
+      width: min(100%, 300px);
+      flex: 0 0 300px;
+    }
+
+    .search input {
+      width: 100%;
+      height: 46px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      outline: none;
+      background: var(--surface);
+      color: var(--ink);
+      font: inherit;
+      font-size: 14px;
+      padding: 0 15px 0 42px;
+      transition: border-color 150ms ease, box-shadow 150ms ease;
+    }
+
+    .search input:focus {
+      border-color: #8ebba3;
+      box-shadow: 0 0 0 3px rgba(23, 107, 72, 0.1);
+    }
+
+    .search-icon {
+      position: absolute;
+      top: 50%;
+      left: 15px;
+      width: 16px;
+      height: 16px;
+      color: var(--muted);
+      transform: translateY(-50%);
+      pointer-events: none;
+    }
+
+    .link-groups {
+      display: grid;
+      gap: 24px;
+    }
+
+    .group-heading {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      margin: 0 0 12px;
+    }
+
+    .group-heading h2 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .group-count {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .link-card {
+      display: flex;
+      min-height: 76px;
+      align-items: center;
+      gap: 13px;
+      padding: 14px 15px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--surface);
+      color: inherit;
+      text-decoration: none;
+      transition: border-color 150ms ease, box-shadow 150ms ease, transform 150ms ease;
+    }
+
+    .link-card[hidden],
+    .link-group[hidden] {
+      display: none;
+    }
+
+    .link-card:hover {
+      border-color: #b6d2c1;
+      box-shadow: 0 7px 20px rgba(23, 36, 29, 0.07);
+      transform: translateY(-2px);
+    }
+
+    .link-card:focus-visible {
+      outline: 3px solid rgba(23, 107, 72, 0.3);
+      outline-offset: 2px;
+    }
+
+    .card-icon {
+      display: grid;
+      width: 39px;
+      height: 39px;
+      flex: 0 0 39px;
+      place-items: center;
+      border-radius: 11px;
+      background: #edf5ef;
+      color: var(--green);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+    }
+
+    .card-text {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .card-title {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1.35;
+    }
+
+    .card-domain {
+      display: block;
+      overflow: hidden;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 11px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .external-icon {
+      width: 15px;
+      height: 15px;
+      flex: 0 0 15px;
+      color: #849087;
+    }
+
+    .empty-state {
+      display: none;
+      padding: 28px;
+      border: 1px dashed #cbd6ce;
+      border-radius: 14px;
+      color: var(--muted);
+      text-align: center;
+      font-size: 14px;
+    }
+
+    .site-footer {
+      margin-bottom: 20px;
+      padding: 22px;
+      border-radius: 15px;
+      background: var(--oxford-blue);
+      color: #d3deeb;
+      font-size: 12px;
+    }
+
+    .footer-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .footer-row a {
+      color: #ffffff;
+      text-decoration: none;
+    }
+
+    .footer-row a:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 760px) {
+      .hero {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .search {
+        width: 100%;
+        flex-basis: auto;
+      }
+
+      .cards {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+    }
+
+    @media (max-width: 540px) {
+      .page {
+        width: min(100% - 28px, 1120px);
+      }
+
+      main.page {
+        padding-top: 23px;
+      }
+
+      .site-header {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 13px;
+        padding: 14px;
+      }
+
+      .main-nav {
+        width: 100%;
+        justify-content: space-between;
+        gap: 10px;
+      }
+
+      .main-nav a {
+        font-size: 12px;
+      }
+
+      .main-nav .nav-quicklinks {
+        padding: 8px 10px;
+      }
+
+      .brand-logo {
+        width: 46px;
+        height: 46px;
+        flex-basis: 46px;
+      }
+
+      .cards {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header page">
+    <a class="brand" href="index.html" aria-label="Shree Shivashakthi Motors">
+      <img class="brand-logo" src="Assets/Logo.png" alt="">
+      <span>
+        <span class="brand-name">Shree Shivashakthi Motors</span>
+        <span class="brand-caption">Organization Quick Links</span>
+      </span>
+    </a>
+    <nav class="main-nav" aria-label="Main navigation">
+      <a class="nav-quicklinks" href="index.html" aria-current="page">Home</a>
+      <a class="nav-quicklinks" href="quicklinks.html" aria-current="page">Quick Links</a>
+    </nav>
+  </header>
+
+  <main class="page">
+    <section class="hero" aria-labelledby="page-title">
+      <div>
+        <p class="eyebrow">Daily tools</p>
+        <h1 id="page-title">Quick links</h1>
+        <p class="hero-copy">Your everyday portals and services, together in one place. Select a link to open it in a new tab.</p>
+      </div>
+      <label class="search">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <circle cx="10.8" cy="10.8" r="6.8" stroke="currentColor" stroke-width="1.8"></circle>
+          <path d="m16 16 4.2 4.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path>
+        </svg>
+        <input id="link-search" type="search" placeholder="Search links..." aria-label="Search links">
+      </label>
+    </section>
+
+    <div class="link-groups" id="link-groups">
+      <section class="link-group" aria-labelledby="tata-heading">
+        <div class="group-heading">
+          <h2 id="tata-heading">Tata Motors portals</h2>
+          <span class="group-count"></span>
+        </div>
+        <div class="cards">
+          <a class="link-card" href="https://cvcx.tatamotors.com/dealershipportal/s/login/" target="_blank" rel="noopener noreferrer">
+            <span class="card-icon" aria-hidden="true">SF</span>
+            <span class="card-text"><span class="card-title">SalesForce</span><span class="card-domain">cvcx.tatamotors.com</span></span>
+            <svg class="external-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path><path d="M18 13v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg>
+          </a>
+          <a class="link-card" href="https://crmdms.inservices.tatamotors.com/siebel/app/workshop/enu/" target="_blank" rel="noopener noreferrer">
+            <span class="card-icon" aria-hidden="true">DM</span>
+            <span class="card-text"><span class="card-title">CRMDMS Workshop Link</span><span class="card-domain">crmdms.inservices.tatamotors.com</span></span>
+            <svg class="external-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path><path d="M18 13v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg>
+          </a>
+          <a class="link-card" href="https://crmidm.inservices.tatamotors.com/identity/" target="_blank" rel="noopener noreferrer">
+            <span class="card-icon" aria-hidden="true">ID</span>
+            <span class="card-text"><span class="card-title">CRM IDM Password Reset</span><span class="card-domain">crmidm.inservices.tatamotors.com</span></span>
+            <svg class="external-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path><path d="M18 13v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg>
+          </a>
+          <a class="link-card" href="https://insights.inservices.cv.tatamotors/analytics/" target="_blank" rel="noopener noreferrer">
+            <span class="card-icon" aria-hidden="true">CA</span>
+            <span class="card-text"><span class="card-title">CRM Analytics link</span><span class="card-domain">insights.inservices.cv.tatamotors</span></span>
+            <svg class="external-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path><path d="M18 13v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg>
+          </a>
+          <a class="link-card" href="https://itservicedesk.tatamotors.com/TataMotors/" target="_blank" rel="noopener noreferrer">
+            <span class="card-icon" aria-hidden="true">IT</span>
+            <span class="card-text"><span class="card-title">CRM IT Support</span><span class="card-domain">itservicedesk.tatamotors.com</span></span>
+            <svg class="external-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path><path d="M18 13v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg>
+          </a>
+          <a class="link-card" href="https://portal.cvnextgenapps.tatamotors.com/" target="_blank" rel="noopener noreferrer">
+            <span class="card-icon" aria-hidden="true">NG</span>
+            <span class="card-text"><span class="card-title">CV NextGen App</span><span class="card-domain">portal.cvnextgenapps.tatamotors.com</span></span>
+            <svg class="external-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path><path d="M18 13v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg>
+          </a>
+          <a class="link-card" href="https://cvworkshop-vehicles-trackntrace.home.tatamotors/" target="_blank" rel="noopener noreferrer">
+            <span class="card-icon" aria-hidden="true">TR</span>
+            <span class="card-text"><span class="card-title">CV Traces Workshop</span><span class="card-domain">cvworkshop-vehicles-trackntrace.home.tatamotors</span></span>
+            <svg class="external-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path><path d="M18 13v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg>
+          </a>
+          <a class="link-card" href="https://tops.cv.tatamotors/" target="_blank" rel="noopener noreferrer">
+            <span class="card-icon" aria-hidden="true">TP</span>
+            <span class="card-text"><span class="card-title">CV TOPS</span><span class="card-domain">tops.cv.tatamotors</span></span>
+            <svg class="external-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path><path d="M18 13v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg>
+          </a>
+          <a class="link-card" href="https://tgpecatsindia.tatamotors.com/" target="_blank" rel="noopener noreferrer">
+            <span class="card-icon" aria-hidden="true">EC</span>
+            <span class="card-text"><span class="card-title">CV Ecats</span><span class="card-domain">tgpecatsindia.tatamotors.com</span></span>
+            <svg class="external-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path><path d="M18 13v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg>
+          </a>
+          <a class="link-card" href="https://edukaan.cv.tatamotors/" target="_blank" rel="noopener noreferrer">
+            <span class="card-icon" aria-hidden="true">ED</span>
+            <span class="card-text"><span class="card-title">CV Edukkan</span><span class="card-domain">edukaan.cv.tatamotors</span></span>
+            <svg class="external-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path><path d="M18 13v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg>
+          </a>
+          <a class="link-card" href="https://cvifir.tatamotors.com/" target="_blank" rel="noopener noreferrer">
+            <span class="card-icon" aria-hidden="true">IF</span>
+            <span class="card-text"><span class="card-title">CV IFIR Portal</span><span class="card-domain">cvifir.tatamotors.com</span></span>
+            <svg class="external-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path><path d="M18 13v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg>
+          </a>
+          <a class="link-card" href="https://jsrwebapps.inservices.tatamotors.com/jctoken/login/" target="_blank" rel="noopener noreferrer">
+            <span class="card-icon" aria-hidden="true">TK</span>
+            <span class="card-text"><span class="card-title">CV Service token Management</span><span class="card-domain">jsrwebapps.inservices.tatamotors.com</span></span>
+            <svg class="external-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path><path d="M18 13v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg>
+          </a>
+        </div>
+      </section>
+
+      <section class="link-group" aria-labelledby="operations-heading">
+        <div class="group-heading">
+          <h2 id="operations-heading">Operations &amp; support</h2>
+          <span class="group-count"></span>
+        </div>
+        <div class="cards">
+          <a class="link-card" href="https://www.freighttiger.com/login/" target="_blank" rel="noopener noreferrer">
+            <span class="card-icon" aria-hidden="true">FT</span>
+            <span class="card-text"><span class="card-title">Freighttiger</span><span class="card-domain">freighttiger.com</span></span>
+            <svg class="external-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path><path d="M18 13v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg>
+          </a>
+          <a class="link-card" href="https://play.google.com/store/apps/details?id=spin.tmsa.cvbu&amp;hl=en_IN" target="_blank" rel="noopener noreferrer">
+            <span class="card-icon" aria-hidden="true">TM</span>
+            <span class="card-text"><span class="card-title">TMSA CV Android app link</span><span class="card-domain">Google Play Store</span></span>
+            <svg class="external-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path><path d="M18 13v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg>
+          </a>
+          <a class="link-card" href="https://gdcsupport.tatamotors.com/gdc_prd/#/login" target="_blank" rel="noopener noreferrer">
+            <span class="card-icon" aria-hidden="true">GD</span>
+            <span class="card-text"><span class="card-title">GDC Support</span><span class="card-domain">gdcsupport.tatamotors.com</span></span>
+            <svg class="external-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path><path d="M18 13v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg>
+          </a>
+        </div>
+      </section>
+
+      <section class="link-group" aria-labelledby="finance-heading">
+        <div class="group-heading">
+          <h2 id="finance-heading">Banking &amp; compliance</h2>
+          <span class="group-count"></span>
+        </div>
+        <div class="cards">
+          <a class="link-card" href="https://yonobusiness.sbi.bank.in/yonobusinesslogin" target="_blank" rel="noopener noreferrer">
+            <span class="card-icon" aria-hidden="true">SBI</span>
+            <span class="card-text"><span class="card-title">SBI Business Netbanking</span><span class="card-domain">yonobusiness.sbi.bank.in</span></span>
+            <svg class="external-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path><path d="M18 13v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg>
+          </a>
+          <a class="link-card" href="https://cibnext.icici.bank.in/corp/AuthenticationController?FORMSGROUP_ID__=AuthenticationFG&amp;__START_TRAN_FLAG__=Y&amp;FG_BUTTONS__=LOAD&amp;ACTION.LOAD=Y&amp;AuthenticationFG.LOGIN_FLAG=1&amp;BANK_ID=ICI&amp;ITM=nli_corp_primer_login_btn_desk&amp;_ga=2.53055592.151335549.1698035816-1973315115.1690798212&amp;_gac=1.6934150.1697523963.EAIaIQobChMI-7jpvrn8gQMVt6lmAh1nywMHEAAYASAAEgKBxfD_BwE?ITM=nli_personalb_corporate_desktop_login_btn" target="_blank" rel="noopener noreferrer">
+            <span class="card-icon" aria-hidden="true">ICI</span>
+            <span class="card-text"><span class="card-title">ICICI Corporate Netbanking</span><span class="card-domain">cibnext.icici.bank.in</span></span>
+            <svg class="external-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path><path d="M18 13v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg>
+          </a>
+          <a class="link-card" href="https://services.gst.gov.in/services/searchtp" target="_blank" rel="noopener noreferrer">
+            <span class="card-icon" aria-hidden="true">GST</span>
+            <span class="card-text"><span class="card-title">GST Number Verification</span><span class="card-domain">services.gst.gov.in</span></span>
+            <svg class="external-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path><path d="M18 13v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg>
+          </a>
+        </div>
+      </section>
+    </div>
+
+    <div class="empty-state" id="empty-state" role="status">No links match your search.</div>
+  </main>
+  <footer class="site-footer page">
+    <div class="footer-row">
+      <span>© Shree Shivashakthi Motors · Shahapur, Koppal</span>
+      <a href="index.html">Back to home page</a>
+    </div>
+  </footer>
+  <script>
+    const searchInput = document.getElementById("link-search");
+    const groups = document.querySelectorAll(".link-group");
+    const emptyState = document.getElementById("empty-state");
+
+    function updateLinkGroups() {
+      const query = searchInput.value.trim().toLowerCase();
+      let visibleCards = 0;
+
+      groups.forEach((group) => {
+        const cards = group.querySelectorAll(".link-card");
+        let visibleInGroup = 0;
+
+        cards.forEach((card) => {
+          const matches = card.textContent.toLowerCase().includes(query);
+          card.hidden = !matches;
+          if (matches) visibleInGroup += 1;
+        });
+
+        group.hidden = visibleInGroup === 0;
+        group.querySelector(".group-count").textContent =
+          `${visibleInGroup} ${visibleInGroup === 1 ? "link" : "links"}`;
+        visibleCards += visibleInGroup;
+      });
+
+      emptyState.style.display = visibleCards === 0 ? "block" : "none";
+    }
+
+    searchInput.addEventListener("input", updateLinkGroups);
+    updateLinkGroups();
+  </script>
+</body>
+</html>
