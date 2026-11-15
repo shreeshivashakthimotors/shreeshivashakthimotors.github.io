@@ -179,10 +179,6 @@
       margin-top: 22px;
     }
 
-    .auth-form {
-      margin-top: 22px;
-    }
-
     button,
     input,
     select {
@@ -298,17 +294,6 @@
 
     .notice:empty {
       display: none;
-    }
-
-    .setup-note {
-      margin-top: 18px;
-      padding: 13px 15px;
-      border-left: 3px solid #d6a64b;
-      border-radius: 8px;
-      background: #fffaf0;
-      color: #64522d;
-      font-size: 12px;
-      line-height: 1.55;
     }
 
     .capture-layout {
@@ -563,19 +548,7 @@
         <button id="open-add" type="button">Add GPS Photos</button>
         <button id="open-view" class="secondary" type="button">View GPS Photos</button>
       </div>
-      <form class="auth-form" id="github-auth-form">
-        <div class="field">
-          <label for="github-token">Fine-grained GitHub token</label>
-          <input id="github-token" type="password" autocomplete="new-password" spellcheck="false" placeholder="github_pat_..." required>
-          <span class="field-hint">Create a fine-grained token for this repository only, with Contents: Read and write. The token stays in this page’s memory until reload and is sent directly to GitHub. <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener noreferrer">Open GitHub token settings</a>.</span>
-        </div>
-        <div class="form-actions">
-          <button id="connect-github" type="submit">Connect GitHub</button>
-          <button id="disconnect-github" class="secondary" type="button" hidden>Clear Token</button>
-        </div>
-      </form>
-      <div class="notice" id="auth-status" role="status" aria-live="polite">Not connected. Connect with a repository-scoped token to upload or view photos.</div>
-      <p class="setup-note">Photos and metadata saved here are public and remain in this repository’s Git history. Use a fine-grained token restricted to this repository; never paste a token into chat or commit it to source.</p>
+      <div class="notice" id="auth-status" role="status" aria-live="polite"></div>
     </section>
 
     <section class="panel screen" id="add-panel" aria-labelledby="add-heading" hidden>
@@ -685,6 +658,19 @@
     const GITHUB_PHOTOS_ROOT = "gps-photos";
     const GITHUB_API_ROOT = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}`;
 
+    // Reads MY_KEY_GPS_PHOTOS from global scope/window or build-time replacement
+    const RAW_GPS_KEY = typeof MY_KEY_GPS_PHOTOS !== "undefined"
+      ? MY_KEY_GPS_PHOTOS
+      : (window.MY_KEY_GPS_PHOTOS || "${{ secrets.MY_KEY_GPS_PHOTOS }}");
+
+    function resolveGithubToken() {
+      const token = String(RAW_GPS_KEY || "").trim();
+      if (!token || token === "${{ secrets.MY_KEY_GPS_PHOTOS }}") return "";
+      return token;
+    }
+
+    let githubToken = resolveGithubToken();
+
     const homePanel = document.getElementById("home-panel");
     const addPanel = document.getElementById("add-panel");
     const capturePanel = document.getElementById("capture-panel");
@@ -702,7 +688,6 @@
     const screens = [homePanel, addPanel, capturePanel, viewPanel];
 
     let draft = null;
-    let githubToken = "";
 
     function showScreen(screen) {
       screens.forEach((item) => {
@@ -888,14 +873,9 @@
       return "GitHub could not complete the request. Check the connection and try again.";
     }
 
-    function setGithubAuthStatus(message, isError) {
-      setNotice(authStatus, message, isError);
-      document.getElementById("disconnect-github").hidden = !githubToken;
-    }
-
-    async function githubRequest(path, options, tokenOverride) {
-      const token = tokenOverride || githubToken;
-      if (!token) throw new Error("Connect GitHub with a fine-grained token before continuing.");
+    async function githubRequest(path, options) {
+      const token = githubToken || resolveGithubToken();
+      if (!token) throw new Error("GitHub token (MY_KEY_GPS_PHOTOS) is missing or not configured.");
 
       const requestOptions = options || {};
       const headers = new Headers({ Accept: "application/vnd.github+json" });
@@ -920,9 +900,8 @@
         }
         const requestError = new Error(message || `GitHub request failed (${response.status}).`);
         requestError.status = response.status;
-        if (response.status === 401 && token === githubToken) {
-          githubToken = "";
-          setGithubAuthStatus("GitHub rejected the token. Connect again with a valid token.", true);
+        if (response.status === 401) {
+          setNotice(authStatus, "GitHub rejected MY_KEY_GPS_PHOTOS. Check the configured token.", true);
         }
         throw requestError;
       }
@@ -993,21 +972,6 @@
         body: JSON.stringify(payload)
       });
       return response.json();
-    }
-
-    async function connectGithub(token) {
-      if (location.protocol !== "https:" && location.hostname !== "localhost") {
-        throw new Error("GitHub authentication requires this page to be served over HTTPS.");
-      }
-      const response = await githubRequest("", {}, token);
-      const repository = await response.json();
-      const expectedName = `${GITHUB_OWNER}/${GITHUB_REPO}`.toLowerCase();
-      if (!repository.full_name || repository.full_name.toLowerCase() !== expectedName) {
-        throw new Error(`The token did not open the expected repository ${GITHUB_OWNER}/${GITHUB_REPO}.`);
-      }
-      if (!repository.permissions || repository.permissions.push !== true) {
-        throw new Error("This GitHub account needs write access to the repository. Check the token's repository selection and Contents: Read and write permission.");
-      }
     }
 
     async function uploadDraft() {
@@ -1259,36 +1223,6 @@
       }
     }
 
-    document.getElementById("github-auth-form").addEventListener("submit", async (event) => {
-      event.preventDefault();
-      const tokenInput = document.getElementById("github-token");
-      const connectButton = document.getElementById("connect-github");
-      const token = tokenInput.value.trim();
-      if (!token) {
-        setGithubAuthStatus("Enter a fine-grained GitHub token to connect.", true);
-        return;
-      }
-
-      connectButton.disabled = true;
-      setLoading(authStatus, "Checking GitHub repository access...");
-      try {
-        await connectGithub(token);
-        githubToken = token;
-        tokenInput.value = "";
-        setGithubAuthStatus(`Connected to ${GITHUB_OWNER}/${GITHUB_REPO} for this page session.`, false);
-      } catch (error) {
-        githubToken = "";
-        setGithubAuthStatus(`Could not connect: ${setGithubError(error)}`, true);
-      } finally {
-        connectButton.disabled = false;
-      }
-    });
-
-    document.getElementById("disconnect-github").addEventListener("click", () => {
-      githubToken = "";
-      setGithubAuthStatus("Token cleared from this page session. Revoke the token in GitHub settings if it should no longer be valid.", false);
-    });
-
     document.getElementById("open-add").addEventListener("click", () => {
       document.getElementById("add-form").reset();
       setNotice(document.getElementById("form-status"), "", false);
@@ -1378,6 +1312,10 @@
         dateTo: toDate
       });
     });
+
+    if (!githubToken) {
+      setNotice(authStatus, "GitHub token (MY_KEY_GPS_PHOTOS) is not configured.", true);
+    }
   </script>
 </body>
 </html>
