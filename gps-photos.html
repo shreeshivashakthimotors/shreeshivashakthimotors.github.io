@@ -194,8 +194,7 @@
     }
 
     button,
-    input,
-    select {
+    input {
       font: inherit;
     }
 
@@ -219,7 +218,6 @@
 
     button:focus-visible,
     input:focus-visible,
-    select:focus-visible,
     a:focus-visible {
       outline: 3px solid rgba(23, 107, 72, 0.32);
       outline-offset: 2px;
@@ -256,6 +254,10 @@
       grid-template-columns: minmax(0, 1fr);
     }
 
+    .form-grid.photo-filter-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
     .field {
       display: grid;
       align-content: start;
@@ -267,8 +269,7 @@
       font-weight: 700;
     }
 
-    .field input,
-    .field select {
+    .field input {
       width: 100%;
       min-height: 46px;
       padding: 0 12px;
@@ -276,6 +277,52 @@
       border-radius: 10px;
       background: #ffffff;
       color: var(--ink);
+    }
+
+    .date-input-wrap {
+      position: relative;
+    }
+
+    .field .date-text-input {
+      padding-right: 48px;
+    }
+
+    .date-picker-button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      display: grid;
+      width: 46px;
+      min-height: 46px;
+      place-items: center;
+      padding: 0;
+      border: 0;
+      border-radius: 0 10px 10px 0;
+      background: transparent;
+      color: var(--muted);
+    }
+
+    .date-picker-button:hover:not(:disabled) {
+      background: #f1f5f2;
+      transform: none;
+    }
+
+    .date-picker-button svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .field .date-picker-native {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 46px;
+      height: 46px;
+      min-height: 0;
+      padding: 0;
+      border: 0;
+      opacity: 0;
+      pointer-events: none;
     }
 
     .field-hint {
@@ -488,6 +535,10 @@
         grid-template-columns: 1fr;
       }
 
+      .form-grid.photo-filter-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
       .results {
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
@@ -531,6 +582,10 @@
       .home-actions,
       .form-grid,
       .results {
+        grid-template-columns: 1fr;
+      }
+
+      .form-grid.photo-filter-grid {
         grid-template-columns: 1fr;
       }
 
@@ -627,30 +682,38 @@
 
     <section class="panel screen" id="view-panel" aria-labelledby="view-heading" hidden>
       <h2 id="view-heading">View GPS Photos</h2>
-      <p class="panel-copy">Filter the photo history by vehicle, technician, or capture date range.</p>
+      <p class="panel-copy">Filter the photo history by vehicle or capture date range.</p>
       <form id="filter-form">
-        <div class="form-grid">
+        <div class="form-grid photo-filter-grid">
           <div class="field">
             <label for="filter-vehicle">Vehicle Number</label>
             <input id="filter-vehicle" name="vehicleNumber" type="text" maxlength="20" pattern="[A-Za-z0-9 \-]*" placeholder="All vehicles">
           </div>
           <div class="field">
-            <label for="filter-technician">Technician Name</label>
-            <select id="filter-technician" name="technicianName">
-              <option value="">All technicians</option>
-              <option value="Allabaksh">Allabaksh</option>
-              <option value="Samir">Samir</option>
-              <option value="Aftab">Aftab</option>
-              <option value="Fakruddin">Fakruddin</option>
-            </select>
-          </div>
-          <div class="field">
             <label for="date-from">From Date</label>
-            <input id="date-from" name="dateFrom" type="date">
+            <div class="date-input-wrap">
+              <input class="date-text-input" id="date-from" name="dateFrom" type="text" inputmode="numeric" maxlength="10" pattern="[0-9]{2}-[0-9]{2}-[0-9]{4}" title="Enter the date as dd-mm-yyyy." autocomplete="off" placeholder="dd-mm-yyyy">
+              <button class="date-picker-button" id="choose-date-from" type="button" aria-label="Choose from date">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <rect x="3" y="5" width="18" height="16" rx="2"></rect>
+                  <path d="M16 3v4M8 3v4M3 10h18"></path>
+                </svg>
+              </button>
+              <input class="date-picker-native" id="date-from-picker" type="date" tabindex="-1" aria-hidden="true">
+            </div>
           </div>
           <div class="field">
             <label for="date-to">To Date</label>
-            <input id="date-to" name="dateTo" type="date">
+            <div class="date-input-wrap">
+              <input class="date-text-input" id="date-to" name="dateTo" type="text" inputmode="numeric" maxlength="10" pattern="[0-9]{2}-[0-9]{2}-[0-9]{4}" title="Enter the date as dd-mm-yyyy." autocomplete="off" placeholder="dd-mm-yyyy">
+              <button class="date-picker-button" id="choose-date-to" type="button" aria-label="Choose to date">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <rect x="3" y="5" width="18" height="16" rx="2"></rect>
+                  <path d="M16 3v4M8 3v4M3 10h18"></path>
+                </svg>
+              </button>
+              <input class="date-picker-native" id="date-to-picker" type="date" tabindex="-1" aria-hidden="true">
+            </div>
           </div>
         </div>
         <div class="form-actions">
@@ -750,6 +813,39 @@
         dateStyle: "medium",
         timeStyle: "medium"
       }).format(date);
+    }
+
+    function dateInputToIso(value) {
+      const match = /^(\d{2})-(\d{2})-(\d{4})$/.exec(value);
+      if (!match) return "";
+      const day = Number(match[1]);
+      const month = Number(match[2]);
+      const year = Number(match[3]);
+      const leapYear = year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
+      const daysInMonth = [31, leapYear ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+      if (month < 1 || month > 12 || day < 1 || day > daysInMonth[month - 1]) return "";
+      return `${match[3]}-${match[2]}-${match[1]}`;
+    }
+
+    function isoDateToInput(value) {
+      const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+      return match ? `${match[3]}-${match[2]}-${match[1]}` : "";
+    }
+
+    function bindDatePicker(textInputId, pickerId, buttonId) {
+      const textInput = document.getElementById(textInputId);
+      const picker = document.getElementById(pickerId);
+      const button = document.getElementById(buttonId);
+      textInput.addEventListener("input", () => {
+        picker.value = dateInputToIso(textInput.value);
+      });
+      picker.addEventListener("change", () => {
+        textInput.value = isoDateToInput(picker.value);
+      });
+      button.addEventListener("click", () => {
+        if (typeof picker.showPicker === "function") picker.showPicker();
+        else picker.click();
+      });
     }
 
     function formatPhotoTimestamp(value) {
@@ -1196,12 +1292,6 @@
       }
     }
 
-    function decodeGithubContent(content) {
-      const binary = atob(content.replace(/\s/g, ""));
-      const bytes = Uint8Array.from(binary, (character) => character.charCodeAt(0));
-      return new TextDecoder().decode(bytes);
-    }
-
     async function blobToBase64(blob) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -1219,16 +1309,12 @@
       });
     }
 
-    async function writeGithubFile(path, content, message, updateExisting) {
+    async function writeGithubFile(path, content, message) {
       const payload = {
         message,
         content,
         branch: GITHUB_BRANCH
       };
-      if (updateExisting) {
-        const existing = await getGithubFile(path, true);
-        if (existing && existing.sha) payload.sha = existing.sha;
-      }
       const response = await githubRequest(`/contents/${encodeGithubPath(path)}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -1242,30 +1328,26 @@
         const baseName = `${draftData.folderName}_${localTimestamp(photo.capturedAt)}`;
         let fileName = `${baseName}.jpg`;
         let suffix = 2;
-        while (existingNames.has(fileName) || existingNames.has(`${fileName}.json`)) {
+        while (existingNames.has(fileName)) {
           fileName = `${baseName}_${suffix}.jpg`;
           suffix += 1;
         }
         photo.githubUpload = {
           fileName,
           imagePath: `${folderPath}/${fileName}`,
-          metadataPath: `${folderPath}/${fileName}.json`,
-          imageUploaded: false,
-          metadataUploaded: false
+          imageUploaded: false
         };
       }
 
       const upload = photo.githubUpload;
       existingNames.add(upload.fileName);
-      existingNames.add(`${upload.fileName}.json`);
       if (!upload.imageUploaded) {
         const photoContent = await blobToBase64(photo.stampedBlob);
         try {
           await writeGithubFile(
             upload.imagePath,
             photoContent,
-            `Add GPS photo ${upload.fileName}`,
-            false
+            `Add GPS photo ${upload.fileName}`
           );
           upload.imageUploaded = true;
         } catch (error) {
@@ -1274,30 +1356,6 @@
           if (!existing) throw error;
           upload.imageUploaded = true;
         }
-      }
-
-      if (!upload.metadataUploaded) {
-        const metadata = {
-          vehicleNumber: draftData.vehicleNumber,
-          latitude: photo.latitude,
-          longitude: photo.longitude,
-          locationName: photo.location.place,
-          locationAddress: photo.location.fullAddress,
-          capturedAt: photo.capturedAt.toISOString(),
-          mapsUrl: photo.mapUrl,
-          photo: upload.fileName
-        };
-        const metadataContent = await blobToBase64(new Blob(
-          [JSON.stringify(metadata, null, 2)],
-          { type: "application/json" }
-        ));
-        await writeGithubFile(
-          upload.metadataPath,
-          metadataContent,
-          `Add GPS photo metadata ${upload.fileName}`,
-          true
-        );
-        upload.metadataUploaded = true;
       }
     }
 
@@ -1309,7 +1367,7 @@
       }
 
       uploadButton.disabled = true;
-      setLoading(uploadStatus, `Saving ${draft.photos.length} ${draft.photos.length === 1 ? "photo" : "photos"} and metadata to GitHub...`);
+      setLoading(uploadStatus, `Saving ${draft.photos.length} ${draft.photos.length === 1 ? "photo" : "photos"} to GitHub...`);
       const folderPath = `${GITHUB_PHOTOS_ROOT}/${draft.folderName}`;
       let existingNames;
       let currentPhoto;
@@ -1320,10 +1378,10 @@
           currentPhoto = photo;
           await uploadPhoto(photo, draft, folderPath, existingNames);
         }
-        setNotice(uploadStatus, `Upload successful: ${draft.photos.length} ${draft.photos.length === 1 ? "photo" : "photos"} and their metadata are in gps-photos/${draft.folderName}.`, false);
+        setNotice(uploadStatus, `Upload successful: ${draft.photos.length} ${draft.photos.length === 1 ? "photo" : "photos"} are in gps-photos/${draft.folderName}.`, false);
         uploadButton.textContent = "Saved to GitHub";
       } catch (error) {
-        const completed = draft.photos.filter((photo) => photo.githubUpload && photo.githubUpload.metadataUploaded).length;
+        const completed = draft.photos.filter((photo) => photo.githubUpload && photo.githubUpload.imageUploaded).length;
         const photoName = currentPhoto && currentPhoto.originalFile.name;
         const message = completed
           ? `Uploaded ${completed} of ${draft.photos.length} photos. Failed on ${photoName || "a photo"}: ${setGithubError(error)} Retry to finish the batch.`
@@ -1333,26 +1391,26 @@
       }
     }
 
-    async function readPhotoMetadata(path, fallbackVehicle) {
-      const file = await getGithubFile(path, true);
-      if (!file || !file.content) {
-        return { vehicleNumber: fallbackVehicle, technicianName: "", capturedAt: "", latitude: NaN, longitude: NaN };
+    function photoDetailsFromFilename(file, vehicleNumber) {
+      const timestampMatch = file.name.match(/_(\d{8})_(\d{6})(?:_\d+)?\.jpe?g$/i);
+      let capturedAt = "";
+      if (timestampMatch) {
+        const year = Number(timestampMatch[1].slice(0, 4));
+        const month = Number(timestampMatch[1].slice(4, 6));
+        const day = Number(timestampMatch[1].slice(6, 8));
+        const hours = Number(timestampMatch[2].slice(0, 2));
+        const minutes = Number(timestampMatch[2].slice(2, 4));
+        const seconds = Number(timestampMatch[2].slice(4, 6));
+        const date = new Date(year, month - 1, day, hours, minutes, seconds);
+        if (date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day
+          && date.getHours() === hours && date.getMinutes() === minutes && date.getSeconds() === seconds) {
+          capturedAt = date.toISOString();
+        }
       }
-      try {
-        const metadata = JSON.parse(decodeGithubContent(file.content));
-        return {
-          vehicleNumber: metadata.vehicleNumber || fallbackVehicle,
-          technicianName: metadata.technicianName || "",
-          capturedAt: metadata.capturedAt || "",
-          latitude: metadata.latitude === undefined ? NaN : Number(metadata.latitude),
-          longitude: metadata.longitude === undefined ? NaN : Number(metadata.longitude),
-          mapsUrl: Number.isFinite(Number(metadata.latitude)) && Number.isFinite(Number(metadata.longitude))
-            ? `https://maps.google.com/?q=${Number(metadata.latitude)},${Number(metadata.longitude)}`
-            : ""
-        };
-      } catch (error) {
-        throw new Error(`Metadata for ${path} is invalid JSON.`);
-      }
+      return {
+        vehicleNumber,
+        capturedAt
+      };
     }
 
     function matchesDateRange(capturedAt, fromDate, toDate) {
@@ -1367,7 +1425,6 @@
       setLoading(viewStatus, "Loading photo history from GitHub...");
       try {
         const vehicleFilter = normalizeVehicle(filters.vehicleNumber);
-        const technicianFilter = filters.technicianName;
         const fromDate = filters.dateFrom;
         const toDate = filters.dateTo;
         const entries = await listGithubDirectory(GITHUB_PHOTOS_ROOT, true);
@@ -1380,14 +1437,13 @@
           const files = await listGithubDirectory(folder.path, false);
           const photos = files.filter((file) => file.type === "file" && /\.jpe?g$/i.test(file.name));
           for (const file of photos) {
-            const metadata = await readPhotoMetadata(`${file.path}.json`, folder.name);
-            if (technicianFilter && metadata.technicianName !== technicianFilter) continue;
-            if (!matchesDateRange(metadata.capturedAt, fromDate, toDate)) continue;
-            records.push({ file, metadata });
+            const photoDetails = photoDetailsFromFilename(file, folder.name);
+            if (!matchesDateRange(photoDetails.capturedAt, fromDate, toDate)) continue;
+            records.push({ file, photoDetails });
           }
         }
 
-        records.sort((first, second) => new Date(second.metadata.capturedAt || 0) - new Date(first.metadata.capturedAt || 0));
+        records.sort((first, second) => new Date(second.photoDetails.capturedAt || 0) - new Date(first.photoDetails.capturedAt || 0));
         if (!records.length) {
           setNotice(viewStatus, "No GPS photos match those filters.", false);
           return;
@@ -1412,13 +1468,13 @@
     }
 
     function createResultCard(record) {
-      const { file, metadata } = record;
+      const { file, photoDetails } = record;
       const card = document.createElement("article");
       card.className = "result-card";
       const preview = document.createElement("div");
       preview.className = "result-preview";
       const image = document.createElement("img");
-      image.alt = `GPS photo of ${metadata.vehicleNumber}`;
+      image.alt = `GPS photo of ${photoDetails.vehicleNumber}`;
       image.loading = "lazy";
       image.dataset.filePath = file.path;
       const previewLabel = document.createElement("span");
@@ -1428,19 +1484,11 @@
       const content = document.createElement("div");
       content.className = "result-content";
       const title = document.createElement("h3");
-      title.textContent = metadata.vehicleNumber;
+      title.textContent = photoDetails.vehicleNumber;
       const details = document.createElement("p");
-      details.textContent = `${metadata.technicianName || "Technician not recorded"} · ${formatDateTime(metadata.capturedAt)} · ${Number.isFinite(metadata.latitude) && Number.isFinite(metadata.longitude) ? `${metadata.latitude.toFixed(6)}, ${metadata.longitude.toFixed(6)}` : "GPS unavailable"}`;
+      details.textContent = `${formatDateTime(photoDetails.capturedAt)} · GPS stamped in photo`;
       const actions = document.createElement("div");
       actions.className = "result-actions";
-      if (metadata.mapsUrl) {
-        const mapLink = document.createElement("a");
-        mapLink.href = metadata.mapsUrl;
-        mapLink.target = "_blank";
-        mapLink.rel = "noopener noreferrer";
-        mapLink.textContent = "View on Map";
-        actions.append(mapLink);
-      }
       const downloadButton = document.createElement("button");
       downloadButton.type = "button";
       downloadButton.className = "secondary";
@@ -1516,6 +1564,9 @@
       document.getElementById("filter-vehicle").focus();
     });
 
+    bindDatePicker("date-from", "date-from-picker", "choose-date-from");
+    bindDatePicker("date-to", "date-to-picker", "choose-date-to");
+
     document.querySelectorAll("[data-home]").forEach((button) => {
       button.addEventListener("click", () => showScreen(homePanel));
     });
@@ -1585,15 +1636,21 @@
     document.getElementById("filter-form").addEventListener("submit", (event) => {
       event.preventDefault();
       if (!event.currentTarget.reportValidity()) return;
-      const fromDate = document.getElementById("date-from").value;
-      const toDate = document.getElementById("date-to").value;
+      const fromInput = document.getElementById("date-from");
+      const toInput = document.getElementById("date-to");
+      const fromDate = dateInputToIso(fromInput.value);
+      const toDate = dateInputToIso(toInput.value);
+      if ((fromInput.value && !fromDate) || (toInput.value && !toDate)) {
+        setNotice(viewStatus, "Enter valid dates in dd-mm-yyyy format.", true);
+        (fromInput.value && !fromDate ? fromInput : toInput).focus();
+        return;
+      }
       if (fromDate && toDate && fromDate > toDate) {
         setNotice(viewStatus, "The From Date must be on or before the To Date.", true);
         return;
       }
       searchPhotos({
         vehicleNumber: document.getElementById("filter-vehicle").value,
-        technicianName: document.getElementById("filter-technician").value,
         dateFrom: fromDate,
         dateTo: toDate
       });
