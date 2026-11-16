@@ -700,13 +700,9 @@
 
     <section class="panel screen" id="generate-panel" aria-labelledby="generate-heading" hidden>
       <h2 id="generate-heading">Generate GPS Photos</h2>
-      <p class="panel-copy">Choose one or more existing pictures, enter the vehicle and capture date/time, then tap the map to select the location. Generated JPEGs can be downloaded without uploading them to GitHub.</p>
+      <p class="panel-copy">Choose one or more existing pictures, enter the capture date/time, then tap the map to select the location. Generated JPEGs can be downloaded without uploading them to GitHub.</p>
       <form id="generate-form">
         <div class="form-grid">
-          <div class="field">
-            <label for="generator-vehicle">Vehicle Number <span aria-hidden="true">*</span></label>
-            <input id="generator-vehicle" name="vehicleNumber" type="text" maxlength="20" pattern="[A-Za-z0-9 \-]+" autocomplete="off" placeholder="e.g. KA05NB1234" required>
-          </div>
           <div class="field">
             <label for="generator-captured-at">Capture Date &amp; Time <span aria-hidden="true">*</span></label>
             <input id="generator-captured-at" name="capturedAt" type="datetime-local" required>
@@ -1255,8 +1251,7 @@
         `${data.location.place} ${data.location.flag}`.trim(),
         data.location.fullAddress,
         `Lat ${data.latitude.toFixed(6)}°  Long ${data.longitude.toFixed(6)}°`,
-        formatPhotoTimestamp(data.capturedAt),
-        `Vehicle Reg No: ${data.vehicleNumber}`
+        formatPhotoTimestamp(data.capturedAt)
       ];
       let fontSize = Math.max(18, Math.min(42, Math.round(mapWidth * 0.18)));
       let padding;
@@ -1481,11 +1476,6 @@
         return;
       }
 
-      const vehicleNumber = document.getElementById("generator-vehicle").value.trim().toUpperCase();
-      if (!normalizeVehicle(vehicleNumber)) {
-        setNotice(generatorStatus, "A valid Vehicle Number is required.", true);
-        return;
-      }
       const capturedAt = new Date(document.getElementById("generator-captured-at").value);
       if (Number.isNaN(capturedAt.getTime())) {
         setNotice(generatorStatus, "Enter a valid capture date and time.", true);
@@ -1508,7 +1498,6 @@
         const locationMap = await loadLocationMap(coordinates.latitude, coordinates.longitude);
         for (const file of files) {
           const stamped = await createStampedPhoto(file, {
-            vehicleNumber,
             capturedAt,
             latitude: coordinates.latitude,
             longitude: coordinates.longitude,
