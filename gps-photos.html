@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#002147">
-  <meta name="description" content="Capture, upload, and review GPS-tagged vehicle service photos.">
+  <meta name="description" content="Capture, generate, upload, and review GPS-tagged vehicle service photos.">
   <title>Shree Shivashakthi Motors | GPS Photos</title>
   <link rel="icon" type="image/png" href="Assets/Logo.png">
   <link rel="icon" type="image/png" sizes="192x192" href="/Assets/app-icon-192.png">
@@ -188,7 +188,7 @@
 
     .home-actions {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 14px;
       margin-top: 22px;
     }
@@ -269,6 +269,11 @@
       font-weight: 700;
     }
 
+    .field-label {
+      font-size: 13px;
+      font-weight: 700;
+    }
+
     .field input {
       width: 100%;
       min-height: 46px;
@@ -329,6 +334,37 @@
       color: var(--muted);
       font-size: 12px;
       line-height: 1.5;
+    }
+
+    .location-picker-map {
+      width: 100%;
+      height: 340px;
+      margin-top: 7px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #eef1ed;
+    }
+
+    .map-picker-field {
+      margin-top: 20px;
+    }
+
+    .download-link {
+      display: inline-flex;
+      min-height: 38px;
+      align-items: center;
+      padding: 0 12px;
+      border-radius: 8px;
+      background: var(--green);
+      color: #ffffff !important;
+      font-size: 12px;
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .download-link:hover {
+      background: var(--green-dark);
     }
 
     .form-actions,
@@ -531,6 +567,10 @@
     }
 
     @media (max-width: 760px) {
+      .home-actions {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
       .capture-layout {
         grid-template-columns: 1fr;
       }
@@ -625,14 +665,15 @@
     <section class="hero" aria-labelledby="page-title">
       <p class="eyebrow">Workshop tools</p>
       <h1 id="page-title">GPS Photos</h1>
-      <p class="hero-copy">Capture vehicle photos with location details, then keep each vehicle’s photo history in the GitHub repository.</p>
+      <p class="hero-copy">Capture or generate GPS-stamped vehicle photos, then keep each vehicle’s photo history in the GitHub repository.</p>
     </section>
 
     <section class="panel screen" id="home-panel" aria-labelledby="home-heading">
       <h2 id="home-heading">Choose an action</h2>
-      <p class="panel-copy">Location permission is required when capturing a photo. Use this page over HTTPS and allow camera and location access on your device.</p>
+      <p class="panel-copy">Add GPS Photos uses your current location. Generate GPS Photos lets you stamp existing pictures with a manually selected date, time, and map location.</p>
       <div class="home-actions">
         <button id="open-add" type="button">Add GPS Photos</button>
+        <button id="open-generate" class="secondary" type="button">Generate GPS Photos</button>
         <button id="open-view" class="secondary" type="button">View GPS Photos</button>
       </div>
       <div class="notice" id="auth-status" role="status" aria-live="polite"></div>
@@ -655,6 +696,38 @@
         </div>
       </form>
       <div class="notice" id="form-status" role="status" aria-live="polite"></div>
+    </section>
+
+    <section class="panel screen" id="generate-panel" aria-labelledby="generate-heading" hidden>
+      <h2 id="generate-heading">Generate GPS Photos</h2>
+      <p class="panel-copy">Choose one or more existing pictures, enter the vehicle and capture date/time, then tap the map to select the location. Generated JPEGs can be downloaded without uploading them to GitHub.</p>
+      <form id="generate-form">
+        <div class="form-grid">
+          <div class="field">
+            <label for="generator-vehicle">Vehicle Number <span aria-hidden="true">*</span></label>
+            <input id="generator-vehicle" name="vehicleNumber" type="text" maxlength="20" pattern="[A-Za-z0-9 \-]+" autocomplete="off" placeholder="e.g. KA05NB1234" required>
+          </div>
+          <div class="field">
+            <label for="generator-captured-at">Capture Date &amp; Time <span aria-hidden="true">*</span></label>
+            <input id="generator-captured-at" name="capturedAt" type="datetime-local" required>
+          </div>
+        </div>
+        <div class="field map-picker-field">
+          <span class="field-label">Map Location <span aria-hidden="true">*</span></span>
+          <span class="field-hint">Pan and zoom the map, then tap the photo location to place the marker.</span>
+          <div id="generator-map" class="location-picker-map" role="application" aria-label="Choose a photo location on the map"></div>
+          <span class="field-hint" id="generator-location-status" aria-live="polite">No location selected.</span>
+        </div>
+        <div class="form-actions">
+          <button id="choose-generator-photos" class="secondary" type="button">Choose Photos</button>
+          <button id="generate-photos" type="submit">Generate GPS Photos</button>
+          <button class="secondary" type="button" data-home>Cancel</button>
+        </div>
+      </form>
+      <input class="visually-hidden" id="generator-photo-input" type="file" accept="image/*" multiple aria-label="Choose photos to stamp">
+      <div class="notice" id="generator-status" role="status" aria-live="polite"></div>
+      <div class="photo-previews" id="generator-photo-previews" aria-label="Selected photos"></div>
+      <div class="results" id="generator-results" aria-label="Generated GPS photos"></div>
     </section>
 
     <section class="panel screen" id="capture-panel" aria-labelledby="capture-heading" hidden>
@@ -757,9 +830,18 @@
 
     const homePanel = document.getElementById("home-panel");
     const addPanel = document.getElementById("add-panel");
+    const generatorPanel = document.getElementById("generate-panel");
     const capturePanel = document.getElementById("capture-panel");
     const viewPanel = document.getElementById("view-panel");
     const cameraInput = document.getElementById("camera-input");
+    const generatorForm = document.getElementById("generate-form");
+    const generatorPhotoInput = document.getElementById("generator-photo-input");
+    const generatorPhotoPreviews = document.getElementById("generator-photo-previews");
+    const generatorResults = document.getElementById("generator-results");
+    const generatorStatus = document.getElementById("generator-status");
+    const generatorLocationStatus = document.getElementById("generator-location-status");
+    const chooseGeneratorPhotosButton = document.getElementById("choose-generator-photos");
+    const generatePhotosButton = document.getElementById("generate-photos");
     const photoPreviews = document.getElementById("photo-previews");
     const photoDetails = document.getElementById("photo-details");
     const uploadButton = document.getElementById("upload-photo");
@@ -769,9 +851,16 @@
     const viewStatus = document.getElementById("view-status");
     const authStatus = document.getElementById("auth-status");
     const photoResults = document.getElementById("photo-results");
-    const screens = [homePanel, addPanel, capturePanel, viewPanel];
+    const screens = [homePanel, addPanel, generatorPanel, capturePanel, viewPanel];
 
     let draft = null;
+    let generatorPhotos = [];
+    let generatorPreviewUrls = [];
+    let generatedPhotoUrls = [];
+    let generatorCoordinates = null;
+    let generatorMap = null;
+    let generatorMarker = null;
+    let generatorIsProcessing = false;
 
     function showScreen(screen) {
       screens.forEach((item) => {
@@ -1180,6 +1269,167 @@
       });
     }
 
+    function clearGeneratorPreviews() {
+      generatorPreviewUrls.forEach((url) => URL.revokeObjectURL(url));
+      generatorPreviewUrls = [];
+      generatorPhotoPreviews.replaceChildren();
+    }
+
+    function renderGeneratorPreviews() {
+      clearGeneratorPreviews();
+      generatorPhotos.forEach((file, index) => {
+        const preview = document.createElement("img");
+        preview.className = "photo-preview";
+        preview.alt = `Selected photo ${index + 1} of ${generatorPhotos.length}: ${file.name}`;
+        preview.src = URL.createObjectURL(file);
+        generatorPreviewUrls.push(preview.src);
+        generatorPhotoPreviews.append(preview);
+      });
+    }
+
+    function clearGeneratedPhotos() {
+      generatorResults.replaceChildren();
+      generatedPhotoUrls.forEach((url) => URL.revokeObjectURL(url));
+      generatedPhotoUrls = [];
+    }
+
+    function addGeneratedPhoto(file, blob) {
+      const card = document.createElement("article");
+      card.className = "result-card";
+      const preview = document.createElement("div");
+      preview.className = "result-preview";
+      const image = document.createElement("img");
+      image.alt = `Generated GPS photo: ${file.name}`;
+      const imageUrl = URL.createObjectURL(blob);
+      generatedPhotoUrls.push(imageUrl);
+      image.src = imageUrl;
+      preview.append(image);
+
+      const content = document.createElement("div");
+      content.className = "result-content";
+      const title = document.createElement("h3");
+      title.textContent = file.name;
+      const actions = document.createElement("div");
+      actions.className = "result-actions";
+      const downloadLink = document.createElement("a");
+      downloadLink.className = "download-link";
+      downloadLink.href = imageUrl;
+      downloadLink.download = `${file.name.replace(/\.[^.]+$/, "")}_GPS.jpg`;
+      downloadLink.textContent = "Download GPS Photo";
+      actions.append(downloadLink);
+      content.append(title, actions);
+      card.append(preview, content);
+      generatorResults.append(card);
+    }
+
+    function initializeGeneratorMap() {
+      if (!window.maplibregl) {
+        throw new Error("The map could not be loaded. Check your internet connection and try again.");
+      }
+      if (generatorMap) {
+        window.requestAnimationFrame(() => {
+          generatorMap.resize();
+          generatorMap.jumpTo({ center: [76.5, 15.2], zoom: 6 });
+        });
+        return;
+      }
+
+      generatorMap = new window.maplibregl.Map({
+        container: document.getElementById("generator-map"),
+        style: OPENFREEMAP_STYLE_URL,
+        center: [76.5, 15.2],
+        zoom: 6,
+        attributionControl: false
+      });
+      generatorMap.on("click", (event) => {
+        if (generatorIsProcessing) return;
+        generatorCoordinates = {
+          latitude: event.lngLat.lat,
+          longitude: event.lngLat.lng
+        };
+        if (!generatorMarker) {
+          generatorMarker = new window.maplibregl.Marker({ color: "#e53935" })
+            .setLngLat([generatorCoordinates.longitude, generatorCoordinates.latitude])
+            .addTo(generatorMap);
+        } else {
+          generatorMarker.setLngLat([generatorCoordinates.longitude, generatorCoordinates.latitude]);
+        }
+        generatorLocationStatus.textContent = `Selected: ${generatorCoordinates.latitude.toFixed(6)}, ${generatorCoordinates.longitude.toFixed(6)}`;
+        clearGeneratedPhotos();
+        setNotice(generatorStatus, "", false);
+      });
+      generatorMap.on("error", () => {
+        if (!generatorMap.isStyleLoaded()) {
+          setNotice(generatorStatus, "The map could not load. Check your internet connection and try again.", true);
+        }
+      });
+    }
+
+    async function generateGpsPhotos(event) {
+      event.preventDefault();
+      if (!generatorForm.reportValidity()) return;
+      if (!generatorPhotos.length) {
+        setNotice(generatorStatus, "Choose at least one photo to generate.", true);
+        return;
+      }
+      if (!generatorCoordinates) {
+        setNotice(generatorStatus, "Tap the map to select the photo location.", true);
+        return;
+      }
+
+      const vehicleNumber = document.getElementById("generator-vehicle").value.trim().toUpperCase();
+      if (!normalizeVehicle(vehicleNumber)) {
+        setNotice(generatorStatus, "A valid Vehicle Number is required.", true);
+        return;
+      }
+      const capturedAt = new Date(document.getElementById("generator-captured-at").value);
+      if (Number.isNaN(capturedAt.getTime())) {
+        setNotice(generatorStatus, "Enter a valid capture date and time.", true);
+        return;
+      }
+
+      const files = generatorPhotos.slice();
+      const coordinates = { ...generatorCoordinates };
+      let generatedCount = 0;
+      clearGeneratedPhotos();
+      generatorIsProcessing = true;
+      generatePhotosButton.disabled = true;
+      chooseGeneratorPhotosButton.disabled = true;
+      generatorPhotoInput.disabled = true;
+      document.getElementById("generator-map").style.pointerEvents = "none";
+      setLoading(generatorStatus, `Generating ${files.length} ${files.length === 1 ? "GPS photo" : "GPS photos"}...`);
+
+      try {
+        const location = await reverseGeocode(coordinates.latitude, coordinates.longitude);
+        const locationMap = await loadLocationMap(coordinates.latitude, coordinates.longitude);
+        for (const file of files) {
+          const stamped = await createStampedPhoto(file, {
+            vehicleNumber,
+            capturedAt,
+            latitude: coordinates.latitude,
+            longitude: coordinates.longitude,
+            location,
+            locationMap
+          });
+          addGeneratedPhoto(file, stamped.blob);
+          generatedCount += 1;
+        }
+        setNotice(generatorStatus, `Generated ${generatedCount} ${generatedCount === 1 ? "GPS photo" : "GPS photos"}. Download each JPEG below.`, false);
+      } catch (error) {
+        const detail = error.message || "The GPS photos could not be generated.";
+        const message = generatedCount
+          ? `Generated ${generatedCount} of ${files.length} photos. ${detail}`
+          : detail;
+        setNotice(generatorStatus, message, true);
+      } finally {
+        generatorIsProcessing = false;
+        generatePhotosButton.disabled = false;
+        chooseGeneratorPhotosButton.disabled = false;
+        generatorPhotoInput.disabled = false;
+        document.getElementById("generator-map").style.pointerEvents = "";
+      }
+    }
+
     async function prepareDraftWithLocation() {
       if (!draft || !draft.photos.length) return;
       uploadButton.disabled = true;
@@ -1560,6 +1810,27 @@
       document.getElementById("vehicle-number").focus();
     });
 
+    document.getElementById("open-generate").addEventListener("click", () => {
+      generatorForm.reset();
+      generatorPhotos = [];
+      generatorPhotoInput.value = "";
+      clearGeneratorPreviews();
+      clearGeneratedPhotos();
+      generatorCoordinates = null;
+      if (generatorMarker) {
+        generatorMarker.remove();
+        generatorMarker = null;
+      }
+      generatorLocationStatus.textContent = "No location selected.";
+      setNotice(generatorStatus, "", false);
+      showScreen(generatorPanel);
+      try {
+        initializeGeneratorMap();
+      } catch (error) {
+        setNotice(generatorStatus, error.message || "The map could not be loaded.", true);
+      }
+    });
+
     document.getElementById("open-view").addEventListener("click", () => {
       photoResults.replaceChildren();
       setNotice(viewStatus, "", false);
@@ -1573,6 +1844,29 @@
     document.querySelectorAll("[data-home]").forEach((button) => {
       button.addEventListener("click", () => showScreen(homePanel));
     });
+
+    generatorForm.addEventListener("input", () => {
+      if (generatorIsProcessing) return;
+      clearGeneratedPhotos();
+      setNotice(generatorStatus, "", false);
+    });
+    chooseGeneratorPhotosButton.addEventListener("click", () => {
+      generatorPhotoInput.value = "";
+      generatorPhotoInput.click();
+    });
+    generatorPhotoInput.addEventListener("change", () => {
+      const files = Array.from(generatorPhotoInput.files || []);
+      if (!files.length) return;
+      if (files.some((file) => !file.type.startsWith("image/"))) {
+        setNotice(generatorStatus, "Choose image files only.", true);
+        return;
+      }
+      generatorPhotos = generatorPhotos.concat(files);
+      clearGeneratedPhotos();
+      renderGeneratorPreviews();
+      setNotice(generatorStatus, `${generatorPhotos.length} ${generatorPhotos.length === 1 ? "photo" : "photos"} selected.`, false);
+    });
+    generatorForm.addEventListener("submit", generateGpsPhotos);
 
     document.getElementById("add-form").addEventListener("submit", (event) => {
       event.preventDefault();
