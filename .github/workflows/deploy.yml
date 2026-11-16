@@ -32,6 +32,17 @@ jobs:
           grep -q "__MY_KEY_GPS_PHOTOS__" gps-photos.html || (echo "Error: placeholder missing in gps-photos.html" && exit 1)
           python3 -c 'import os, pathlib; p = pathlib.Path("gps-photos.html"); p.write_text(p.read_text().replace("__MY_KEY_GPS_PHOTOS__", os.environ["GPS_TOKEN"]))'
 
+      - name: Inject optional Mappls static map key
+        env:
+          MAPPLS_KEY: ${{ secrets.MAPPLS_STATIC_KEY }}
+        run: |
+          if [ -n "$MAPPLS_KEY" ]; then
+            grep -q '"__MAPPLS_STATIC_KEY__"' gps-photos.html || (echo "Error: Mappls key placeholder missing in gps-photos.html" && exit 1)
+            python3 -c 'import json, os, pathlib; p = pathlib.Path("gps-photos.html"); p.write_text(p.read_text().replace("\"__MAPPLS_STATIC_KEY__\"", json.dumps(os.environ["MAPPLS_KEY"])))'
+          else
+            echo "MAPPLS_STATIC_KEY is not configured; GPS photo map thumbnails will be unavailable."
+          fi
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
