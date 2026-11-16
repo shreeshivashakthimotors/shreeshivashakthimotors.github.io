@@ -7,6 +7,9 @@
   <meta name="description" content="Capture, upload, and review GPS-tagged vehicle service photos.">
   <title>Shree Shivashakthi Motors | GPS Photos</title>
   <link rel="icon" type="image/png" href="Assets/Logo.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/Assets/app-icon-192.png">
+  <link rel="apple-touch-icon" href="/Assets/app-icon-192.png">
+  <link rel="manifest" href="/site.webmanifest">
   <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.6.1/dist/maplibre-gl.css">
   <style>
     :root {
@@ -247,6 +250,10 @@
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 18px;
       margin-top: 22px;
+    }
+
+    .form-grid.single-column {
+      grid-template-columns: minmax(0, 1fr);
     }
 
     .field {
@@ -563,7 +570,7 @@
     <section class="hero" aria-labelledby="page-title">
       <p class="eyebrow">Workshop tools</p>
       <h1 id="page-title">GPS Photos</h1>
-      <p class="hero-copy">Capture vehicle photos with technician and location details, then keep each vehicle’s photo history in the GitHub repository.</p>
+      <p class="hero-copy">Capture vehicle photos with location details, then keep each vehicle’s photo history in the GitHub repository.</p>
     </section>
 
     <section class="panel screen" id="home-panel" aria-labelledby="home-heading">
@@ -578,23 +585,13 @@
 
     <section class="panel screen" id="add-panel" aria-labelledby="add-heading" hidden>
       <h2 id="add-heading">Add GPS Photos</h2>
-      <p class="panel-copy">Enter the vehicle and technician details, then choose one or more photos from your device.</p>
+      <p class="panel-copy">Enter the vehicle details, then choose one or more photos from your device.</p>
       <form id="add-form">
-        <div class="form-grid">
+        <div class="form-grid single-column">
           <div class="field">
             <label for="vehicle-number">Vehicle Number <span aria-hidden="true">*</span></label>
             <input id="vehicle-number" name="vehicleNumber" type="text" maxlength="20" pattern="[A-Za-z0-9 \-]+" autocomplete="off" placeholder="e.g. KA05NB1234" required>
             <span class="field-hint">Letters, numbers, spaces, and hyphens only.</span>
-          </div>
-          <div class="field">
-            <label for="technician-name">Technician Name <span aria-hidden="true">*</span></label>
-            <select id="technician-name" name="technicianName" required>
-              <option value="">Select a technician</option>
-              <option value="Allabaksh">Allabaksh</option>
-              <option value="Samir">Samir</option>
-              <option value="Aftab">Aftab</option>
-              <option value="Fakruddin">Fakruddin</option>
-            </select>
           </div>
         </div>
         <div class="form-actions">
@@ -614,7 +611,6 @@
         <div class="photo-previews" id="photo-previews"></div>
         <ul class="photo-details" id="photo-details" hidden>
           <li><strong>Vehicle Number</strong><span id="detail-vehicle"></span></li>
-          <li><strong>Technician</strong><span id="detail-technician"></span></li>
           <li><strong>GPS Coordinates</strong><span id="detail-coordinates"></span></li>
           <li><strong>Capture Date &amp; Time</strong><span id="detail-captured"></span></li>
           <li><strong>Google Maps Location</strong><a id="detail-map" target="_blank" rel="noopener noreferrer">Open captured location</a></li>
@@ -1117,7 +1113,6 @@
         }
         renderPhotoPreviews(true);
         document.getElementById("detail-vehicle").textContent = draft.vehicleNumber;
-        document.getElementById("detail-technician").textContent = draft.technicianName;
         document.getElementById("detail-coordinates").textContent = `${draft.photos[0].latitude.toFixed(6)}, ${draft.photos[0].longitude.toFixed(6)}`;
         document.getElementById("detail-captured").textContent = formatDateTime(draft.photos[0].capturedAt);
         const mapLink = document.getElementById("detail-map");
@@ -1244,7 +1239,7 @@
 
     async function uploadPhoto(photo, draftData, folderPath, existingNames) {
       if (!photo.githubUpload) {
-        const baseName = `${draftData.folderName}_${draftData.technicianName}_${localTimestamp(photo.capturedAt)}`;
+        const baseName = `${draftData.folderName}_${localTimestamp(photo.capturedAt)}`;
         let fileName = `${baseName}.jpg`;
         let suffix = 2;
         while (existingNames.has(fileName) || existingNames.has(`${fileName}.json`)) {
@@ -1284,7 +1279,6 @@
       if (!upload.metadataUploaded) {
         const metadata = {
           vehicleNumber: draftData.vehicleNumber,
-          technicianName: draftData.technicianName,
           latitude: photo.latitude,
           longitude: photo.longitude,
           locationName: photo.location.place,
@@ -1436,7 +1430,7 @@
       const title = document.createElement("h3");
       title.textContent = metadata.vehicleNumber;
       const details = document.createElement("p");
-      details.textContent = `${metadata.technicianName || "Technician unavailable"} · ${formatDateTime(metadata.capturedAt)} · ${Number.isFinite(metadata.latitude) && Number.isFinite(metadata.longitude) ? `${metadata.latitude.toFixed(6)}, ${metadata.longitude.toFixed(6)}` : "GPS unavailable"}`;
+      details.textContent = `${metadata.technicianName || "Technician not recorded"} · ${formatDateTime(metadata.capturedAt)} · ${Number.isFinite(metadata.latitude) && Number.isFinite(metadata.longitude) ? `${metadata.latitude.toFixed(6)}, ${metadata.longitude.toFixed(6)}` : "GPS unavailable"}`;
       const actions = document.createElement("div");
       actions.className = "result-actions";
       if (metadata.mapsUrl) {
@@ -1530,9 +1524,8 @@
       event.preventDefault();
       const vehicle = document.getElementById("vehicle-number").value.trim().toUpperCase();
       const normalizedVehicle = normalizeVehicle(vehicle);
-      const technician = document.getElementById("technician-name").value;
-      if (!normalizedVehicle || !technician) {
-        setNotice(document.getElementById("form-status"), "Vehicle Number and Technician Name are required.", true);
+      if (!normalizedVehicle) {
+        setNotice(document.getElementById("form-status"), "A valid Vehicle Number is required.", true);
         return;
       }
       if (draft) {
@@ -1544,13 +1537,12 @@
       draft = {
         vehicleNumber: vehicle,
         folderName: normalizedVehicle,
-        technicianName: technician,
         photos: []
       };
       setNotice(captureStatus, "", false);
       setNotice(uploadStatus, "", false);
       uploadButton.disabled = true;
-      uploadButton.textContent = "Save Photos to GitHub";
+      uploadButton.textContent = "Save Photos";
       photoDetails.hidden = true;
       retryLocationButton.hidden = true;
       showScreen(capturePanel);
