@@ -1228,6 +1228,9 @@
     }
 
     function setGithubError(error) {
+      if (error && error.status === 403 && /resource not accessible by personal access token/i.test(error.message || "")) {
+        return "The GitHub token needs access to this repository and Contents: Read and write permission (fine-grained token) or the repo scope (classic token). However, this site's current deploy embeds the token in public HTML. Revoke that token and use a server-side upload endpoint before configuring another one.";
+      }
       if (error && error.message) return error.message;
       return "GitHub could not complete the request. Check the connection and try again.";
     }
