@@ -7,6 +7,7 @@
   <meta name="description" content="Capture, upload, and review GPS-tagged vehicle service photos.">
   <title>Shree Shivashakthi Motors | GPS Photos</title>
   <link rel="icon" type="image/png" href="Assets/Logo.png">
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.6.1/dist/maplibre-gl.css">
   <style>
     :root {
       color-scheme: light;
@@ -606,7 +607,7 @@
 
     <section class="panel screen" id="capture-panel" aria-labelledby="capture-heading" hidden>
       <h2 id="capture-heading">Review GPS Photos</h2>
-      <p class="panel-copy">Choose one or more photos. GPS coordinates are sent to OpenStreetMap for the address and Mappls for the map thumbnail printed on each image.</p>
+      <p class="panel-copy">Choose one or more photos. GPS coordinates are sent to OpenStreetMap for the address and OpenFreeMap for the map thumbnail printed on each image.</p>
       <input class="visually-hidden" id="camera-input" type="file" accept="image/*" multiple aria-label="Choose vehicle photos">
       <div class="notice" id="capture-status" role="status" aria-live="polite"></div>
       <div class="capture-layout">
@@ -673,14 +674,14 @@
     </div>
   </footer>
 
+  <script src="https://unpkg.com/maplibre-gl@5.6.1/dist/maplibre-gl.js"></script>
   <script>
     const GITHUB_OWNER = "shreeshivashakthimotors";
     const GITHUB_REPO = "shreeshivashakthimotors.github.io";
     const GITHUB_BRANCH = "main";
     const GITHUB_PHOTOS_ROOT = "gps-photos";
     const GITHUB_API_ROOT = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}`;
-    const MAPPLS_STATIC_MAP_URL = "https://tile.mappls.com/map/raster_tile/still_image";
-    const MAPPLS_STATIC_KEY = "__MAPPLS_STATIC_KEY__";
+    const OPENFREEMAP_STYLE_URL = "https://tiles.openfreemap.org/styles/liberty";
 
     // Reads MY_KEY_GPS_PHOTOS from global scope/window or build-time replacement
     const RAW_GPS_KEY = typeof MY_KEY_GPS_PHOTOS !== "undefined"
@@ -836,35 +837,75 @@
     }
 
     async function loadLocationMap(latitude, longitude) {
-      const apiKey = String(MAPPLS_STATIC_KEY || "").trim();
-      if (!apiKey || apiKey === "__MAPPLS_STATIC_KEY__") {
-        throw new Error("Mappls is not configured. Add the MAPPLS_STATIC_KEY GitHub Actions secret to enable map thumbnails.");
+      if (!window.maplibregl) {
+        throw new Error("The map renderer could not be loaded. Check your internet connection and retry.");
       }
 
-      const mapUrl = new URL(MAPPLS_STATIC_MAP_URL);
-      mapUrl.searchParams.set("center", `${latitude},${longitude}`);
-      mapUrl.searchParams.set("zoom", "16");
-      mapUrl.searchParams.set("size", "360x320");
-      mapUrl.searchParams.set("ssf", "1");
-      mapUrl.searchParams.set("access_token", apiKey);
-
-      const mapImage = await new Promise((resolve, reject) => {
-        const image = new Image();
-        image.crossOrigin = "anonymous";
-        image.onload = () => resolve(image);
-        image.onerror = () => reject(new Error(
-          "Mappls could not load the location map. Check that the key has Still Map Image API access and allows this website domain."
-        ));
-        image.src = mapUrl.href;
+      const container = document.createElement("div");
+      container.setAttribute("aria-hidden", "true");
+      Object.assign(container.style, {
+        position: "fixed",
+        left: "-10000px",
+        top: "0",
+        width: "360px",
+        height: "360px"
       });
+      document.body.append(container);
 
-      const thumbnail = document.createElement("canvas");
-      thumbnail.width = 180;
-      thumbnail.height = 160;
-      const thumbnailContext = thumbnail.getContext("2d");
-      if (!thumbnailContext) throw new Error("This browser cannot prepare the location map.");
-      thumbnailContext.drawImage(mapImage, 0, 0, thumbnail.width, thumbnail.height);
-      return thumbnail;
+      return new Promise((resolve, reject) => {
+        let map;
+        let settled = false;
+        const finish = (error, thumbnail) => {
+          if (settled) return;
+          settled = true;
+          window.clearTimeout(timeoutId);
+          if (map) map.remove();
+          container.remove();
+          if (error) reject(error);
+          else resolve(thumbnail);
+        };
+        const timeoutId = window.setTimeout(() => {
+          finish(new Error("OpenFreeMap took too long to load. Check your internet connection and retry."));
+        }, 20000);
+
+        try {
+          map = new window.maplibregl.Map({
+            container,
+            style: OPENFREEMAP_STYLE_URL,
+            center: [longitude, latitude],
+            zoom: 16,
+            pitch: 0,
+            interactive: false,
+            attributionControl: false,
+            preserveDrawingBuffer: true
+          });
+          map.once("idle", () => {
+            if (settled) return;
+            try {
+              const thumbnail = document.createElement("canvas");
+              thumbnail.width = 180;
+              thumbnail.height = 180;
+              const thumbnailContext = thumbnail.getContext("2d");
+              if (!thumbnailContext) {
+                finish(new Error("This browser cannot prepare the location map."));
+                return;
+              }
+              thumbnailContext.drawImage(map.getCanvas(), 0, 0, thumbnail.width, thumbnail.height);
+              thumbnail.toDataURL("image/png");
+              finish(null, thumbnail);
+            } catch (error) {
+              finish(new Error(`OpenFreeMap's map image could not be exported. ${error.message}`));
+            }
+          });
+          map.on("error", (event) => {
+            if (settled) return;
+            const reason = event.error && event.error.message ? `: ${event.error.message}` : "";
+            finish(new Error(`OpenFreeMap could not load map data. Check your connection and retry${reason}.`));
+          });
+        } catch (error) {
+          finish(new Error(`OpenFreeMap could not initialize. ${error.message}`));
+        }
+      });
     }
 
     function loadImage(blob) {
@@ -900,6 +941,17 @@
       return lines;
     }
 
+    function traceRoundedRect(context, x, y, width, height, radius) {
+      const cornerRadius = Math.min(radius, width / 2, height / 2);
+      context.beginPath();
+      context.moveTo(x + cornerRadius, y);
+      context.arcTo(x + width, y, x + width, y + height, cornerRadius);
+      context.arcTo(x + width, y + height, x, y + height, cornerRadius);
+      context.arcTo(x, y + height, x, y, cornerRadius);
+      context.arcTo(x, y, x + width, y, cornerRadius);
+      context.closePath();
+    }
+
     async function createStampedPhoto(file, data) {
       const image = await loadImage(file);
       const scale = Math.min(1, 1920 / Math.max(image.naturalWidth, image.naturalHeight));
@@ -912,32 +964,58 @@
       if (!context) throw new Error("This browser cannot prepare the GPS-stamped photo.");
       context.drawImage(image, 0, 0, width, height);
 
-      const fontSize = Math.max(14, Math.min(28, Math.round(width * 0.018)));
-      const padding = Math.max(12, Math.round(fontSize * 0.7));
-      const lineHeight = Math.round(fontSize * 1.4);
       const mapWidth = Math.min(280, Math.max(120, Math.round(width * 0.24)));
-      const textX = padding * 2 + mapWidth;
-      const textWidth = width - textX - padding;
       const mapUrl = `https://maps.google.com/?q=${data.latitude},${data.longitude}`;
       const rawLines = [
         `${data.location.place} ${data.location.flag}`.trim(),
         data.location.fullAddress,
-        `Lat ${data.latitude.toFixed(6)}°  Lon ${data.longitude.toFixed(6)}°`,
+        `Lat ${data.latitude.toFixed(6)}°  Long ${data.longitude.toFixed(6)}°`,
         formatPhotoTimestamp(data.capturedAt),
-        `Vehicle: ${data.vehicleNumber} · Technician: ${data.technicianName}`
+        `Vehicle Reg No: ${data.vehicleNumber}`
       ];
-      context.font = `600 ${fontSize}px Arial, sans-serif`;
-      const lines = rawLines.flatMap((line) => wrapCanvasText(context, line, textWidth));
-      const attributionFontSize = Math.max(9, Math.round(fontSize * 0.55));
-      const footerHeight = padding * 2 + lines.length * lineHeight + attributionFontSize + Math.ceil(padding / 2);
+      let fontSize = Math.max(18, Math.min(42, Math.round(mapWidth * 0.18)));
+      let padding;
+      let lineHeight;
+      let columnGap;
+      let textBoxX;
+      let textBoxWidth;
+      let textX;
+      let textWidth;
+      let cornerRadius;
+      let verticalPadding;
+      let lines;
+      let textBlockHeight;
+      while (true) {
+        padding = Math.max(12, Math.round(fontSize * 0.7));
+        lineHeight = Math.round(fontSize * 1.4);
+        columnGap = Math.max(20, Math.round(fontSize * 1.1));
+        textBoxX = padding + mapWidth + columnGap;
+        textBoxWidth = width - textBoxX - padding;
+        textX = textBoxX + padding;
+        textWidth = Math.max(1, textBoxWidth - padding * 2);
+        cornerRadius = Math.max(4, Math.round(fontSize * 0.4));
+        verticalPadding = Math.max(2, Math.round(fontSize * 0.15));
+        context.font = `600 ${fontSize}px Arial, sans-serif`;
+        lines = rawLines.flatMap((line) => wrapCanvasText(context, line, textWidth));
+        textBlockHeight = lines.length * lineHeight;
+        if (textBlockHeight + verticalPadding * 2 <= mapWidth || fontSize <= 18) break;
+        fontSize -= 1;
+      }
+      const contentHeight = Math.max(mapWidth, textBlockHeight);
+      const footerHeight = verticalPadding * 2 + contentHeight;
       const footerTop = Math.max(0, height - footerHeight);
-      const mapHeight = Math.max(1, footerHeight - padding * 2);
-      context.fillStyle = "rgba(0, 25, 45, 0.82)";
-      context.fillRect(0, footerTop, width, footerHeight);
-      context.drawImage(data.locationMap, padding, footerTop + padding, mapWidth, mapHeight);
+      const mapHeight = contentHeight;
+      const contentTop = footerTop + verticalPadding;
+      const textTop = contentTop + Math.round((contentHeight - textBlockHeight) / 2);
+      context.save();
+      traceRoundedRect(context, padding, contentTop, mapWidth, mapHeight, cornerRadius);
+      context.clip();
+      context.drawImage(data.locationMap, padding, contentTop, mapWidth, mapHeight);
+      context.restore();
+
       context.fillStyle = "#e53935";
       const pinX = padding + mapWidth / 2;
-      const pinY = footerTop + padding + mapHeight / 2;
+      const pinY = contentTop + mapHeight / 2;
       const pinSize = Math.min(mapWidth, mapHeight) * 0.24;
       context.beginPath();
       context.arc(pinX, pinY - pinSize * 0.18, pinSize * 0.42, Math.PI, 0);
@@ -948,18 +1026,42 @@
       context.beginPath();
       context.arc(pinX, pinY - pinSize * 0.18, pinSize * 0.14, 0, Math.PI * 2);
       context.fill();
+      const mapAttribution = "";
+      const mapAttributionFontSize = Math.max(6, Math.min(10, Math.round(mapWidth * 0.032)));
+      const mapAttributionPadding = Math.max(3, Math.round(mapAttributionFontSize * 0.4));
+      const mapAttributionLineHeight = mapAttributionFontSize + 2;
+      context.font = `${mapAttributionFontSize}px Arial, sans-serif`;
+      const mapAttributionLines = wrapCanvasText(
+        context,
+        mapAttribution,
+        mapWidth - mapAttributionPadding * 2
+      );
+      if (mapAttributionLines.length > 0) {
+        const mapAttributionHeight = mapAttributionPadding * 2 + mapAttributionLines.length * mapAttributionLineHeight;
+        const mapAttributionTop = contentTop + mapHeight - mapAttributionHeight;
+        context.fillStyle = "rgba(0, 0, 0, 0.68)";
+        context.fillRect(padding, mapAttributionTop, mapWidth, mapAttributionHeight);
+        context.fillStyle = "#ffffff";
+        context.textBaseline = "top";
+        mapAttributionLines.forEach((line, index) => {
+          context.fillText(
+            line,
+            padding + mapAttributionPadding,
+            mapAttributionTop + mapAttributionPadding + index * mapAttributionLineHeight,
+            mapWidth - mapAttributionPadding * 2
+          );
+        });
+      }
+
+      context.fillStyle = "rgba(0, 0, 0, 0.68)";
+      traceRoundedRect(context, textBoxX, contentTop, textBoxWidth, contentHeight, cornerRadius);
+      context.fill();
       context.fillStyle = "#ffffff";
+      context.font = `600 ${fontSize}px Arial, sans-serif`;
       context.textBaseline = "top";
       lines.forEach((line, index) => {
-        context.fillText(line, textX, footerTop + padding + index * lineHeight, textWidth);
+        context.fillText(line, textX, textTop + index * lineHeight, textWidth);
       });
-      context.font = `${attributionFontSize}px Arial, sans-serif`;
-      context.fillText(
-        "© OpenStreetMap contributors · Powered by Mappls",
-        textX,
-        height - padding - attributionFontSize,
-        textWidth
-      );
 
       const stampedBlob = await new Promise((resolve, reject) => {
         canvas.toBlob((blob) => {
