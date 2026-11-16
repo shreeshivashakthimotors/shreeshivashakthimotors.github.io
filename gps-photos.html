@@ -732,7 +732,7 @@
 
     <section class="panel screen" id="capture-panel" aria-labelledby="capture-heading" hidden>
       <h2 id="capture-heading">Review GPS Photos</h2>
-      <p class="panel-copy">Choose one or more photos. GPS coordinates are sent to OpenStreetMap for the address and OpenFreeMap for the map thumbnail printed on each image.</p>
+      <p class="panel-copy">Choose one or more photos. GPS coordinates are used to look up the address and satellite map thumbnail printed on each image.</p>
       <input class="visually-hidden" id="camera-input" type="file" accept="image/*" multiple aria-label="Choose vehicle photos">
       <div class="notice" id="capture-status" role="status" aria-live="polite"></div>
       <div class="capture-layout">
@@ -813,7 +813,111 @@
     const GITHUB_BRANCH = "main";
     const GITHUB_PHOTOS_ROOT = "gps-photos";
     const GITHUB_API_ROOT = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}`;
-    const OPENFREEMAP_STYLE_URL = "https://tiles.openfreemap.org/styles/liberty";
+    function createOpenFreeMapPlaceLabelLayer(id, minzoom, filter, textSize, maxzoom) {
+      const layer = {
+        id,
+        type: "symbol",
+        source: "openfreemap-places",
+        "source-layer": "place",
+        minzoom,
+        filter,
+        layout: {
+          "text-field": ["coalesce", ["get", "name_en"], ["get", "name:latin"], ["get", "name"]],
+          "text-font": ["Noto Sans Regular"],
+          "text-size": textSize,
+          "text-max-width": 8
+        },
+        paint: {
+          "text-color": "#ffffff",
+          "text-halo-color": "#17241d",
+          "text-halo-width": 1.5
+        }
+      };
+      if (Number.isFinite(maxzoom)) layer.maxzoom = maxzoom;
+      return layer;
+    }
+
+    const OPENFREEMAP_PLACE_LABEL_LAYERS = [
+      createOpenFreeMapPlaceLabelLayer(
+        "openfreemap-city-label",
+        3,
+        ["all", ["==", ["get", "class"], "city"], ["!=", ["get", "capital"], 2]],
+        13
+      ),
+      createOpenFreeMapPlaceLabelLayer(
+        "openfreemap-capital-label",
+        3,
+        ["all", ["==", ["get", "class"], "city"], ["==", ["get", "capital"], 2]],
+        14
+      ),
+      createOpenFreeMapPlaceLabelLayer("openfreemap-town-label", 6, ["==", ["get", "class"], "town"], 12),
+      createOpenFreeMapPlaceLabelLayer("openfreemap-village-label", 6, ["==", ["get", "class"], "village"], 11),
+      createOpenFreeMapPlaceLabelLayer(
+        "openfreemap-other-place-label",
+        6,
+        ["match", ["get", "class"], ["city", "continent", "country", "state", "town", "village"], false, true],
+        10
+      ),
+      createOpenFreeMapPlaceLabelLayer(
+        "openfreemap-state-label",
+        5,
+        ["==", ["get", "class"], "state"],
+        12,
+        8
+      ),
+      createOpenFreeMapPlaceLabelLayer(
+        "openfreemap-country-label-rank-3",
+        2,
+        ["all", ["==", ["get", "class"], "country"], [">=", ["get", "rank"], 3]],
+        11,
+        9
+      ),
+      createOpenFreeMapPlaceLabelLayer(
+        "openfreemap-country-label-rank-2",
+        0,
+        ["all", ["==", ["get", "class"], "country"], ["==", ["get", "rank"], 2]],
+        12,
+        9
+      ),
+      createOpenFreeMapPlaceLabelLayer(
+        "openfreemap-country-label-rank-1",
+        0,
+        ["all", ["==", ["get", "class"], "country"], ["==", ["get", "rank"], 1]],
+        13,
+        9
+      )
+    ];
+
+    function createSatelliteMapStyle(includePlaceLabels) {
+      const style = {
+        version: 8,
+        sources: {
+          "esri-world-imagery": {
+            type: "raster",
+            tiles: ["https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"],
+            tileSize: 256,
+            attribution: ""
+          }
+        },
+        layers: [
+          {
+            id: "esri-world-imagery",
+            type: "raster",
+            source: "esri-world-imagery"
+          }
+        ]
+      };
+      if (includePlaceLabels) {
+        style.glyphs = "https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf";
+        style.sources["openfreemap-places"] = {
+          type: "vector",
+          url: "https://tiles.openfreemap.org/planet",
+          attribution: ""
+        };
+        style.layers.push(...OPENFREEMAP_PLACE_LABEL_LAYERS);
+      }
+      return style;
+    }
 
     // Reads MY_KEY_GPS_PHOTOS from global scope/window or build-time replacement
     const RAW_GPS_KEY = typeof MY_KEY_GPS_PHOTOS !== "undefined"
@@ -1046,13 +1150,13 @@
           else resolve(thumbnail);
         };
         const timeoutId = window.setTimeout(() => {
-          finish(new Error("OpenFreeMap took too long to load. Check your internet connection and retry."));
+          finish(new Error("Satellite imagery took too long to load. Check your internet connection and retry."));
         }, 20000);
 
         try {
           map = new window.maplibregl.Map({
             container,
-            style: OPENFREEMAP_STYLE_URL,
+            style: createSatelliteMapStyle(false),
             center: [longitude, latitude],
             zoom: 16,
             pitch: 0,
@@ -1075,16 +1179,16 @@
               thumbnail.toDataURL("image/png");
               finish(null, thumbnail);
             } catch (error) {
-              finish(new Error(`OpenFreeMap's map image could not be exported. ${error.message}`));
+              finish(new Error(`The satellite map image could not be exported. ${error.message}`));
             }
           });
           map.on("error", (event) => {
             if (settled) return;
             const reason = event.error && event.error.message ? `: ${event.error.message}` : "";
-            finish(new Error(`OpenFreeMap could not load map data. Check your connection and retry${reason}.`));
+            finish(new Error(`Satellite imagery could not be loaded. Check your connection and retry${reason}.`));
           });
         } catch (error) {
-          finish(new Error(`OpenFreeMap could not initialize. ${error.message}`));
+          finish(new Error(`The satellite map could not initialize. ${error.message}`));
         }
       });
     }
@@ -1336,10 +1440,10 @@
 
       generatorMap = new window.maplibregl.Map({
         container: document.getElementById("generator-map"),
-        style: OPENFREEMAP_STYLE_URL,
+        style: createSatelliteMapStyle(true),
         center: [76.5, 15.2],
         zoom: 6,
-        attributionControl: false
+        attributionControl: true
       });
       generatorMap.on("click", (event) => {
         if (generatorIsProcessing) return;
